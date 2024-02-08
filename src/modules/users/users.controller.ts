@@ -28,6 +28,7 @@ import { JwtAuth } from '@src/decorators/jwt-auth.decorator';
 import { TransformResponseInterceptor } from '@src/interceptors/transform-response.interceptor';
 
 import { CreateUserDto } from './dto/create-user.dto';
+import { DeleteManyUsersDto } from './dto/delete-many-users.dto';
 import { AdminGetUsersDto } from './dto/get-users.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserBasicDto, UserDetailDto } from './dto/user.dto';
@@ -73,8 +74,8 @@ export class UsersController {
 
   @Delete('admin-delete-many')
   @ApiRestResponse(null)
-  async adminDeleteMany(@Body() ids: number[]) {
-    return this.usersService.adminDeleteMany(ids);
+  async adminDeleteMany(@Body() input: DeleteManyUsersDto) {
+    return this.usersService.adminDeleteMany(input);
   }
 
   @Patch('avatar')

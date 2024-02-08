@@ -9,6 +9,7 @@ import { CloudinaryService } from '@src/cloudinary/cloudinary.service';
 import { PrismaService } from '@src/prisma/prisma.service';
 
 import { CreateUserDto } from './dto/create-user.dto';
+import { DeleteManyUsersDto } from './dto/delete-many-users.dto';
 import { AdminGetUsersDto } from './dto/get-users.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 
@@ -168,11 +169,11 @@ export class UsersService {
     });
   }
 
-  public async adminDeleteMany(ids: string[] | number[]) {
+  public async adminDeleteMany(input: DeleteManyUsersDto) {
     await this.prisma.user.deleteMany({
       where: {
         id: {
-          in: ids.map((id) => Number(id)),
+          in: input.ids.map((id) => Number(id)),
         },
       },
     });
