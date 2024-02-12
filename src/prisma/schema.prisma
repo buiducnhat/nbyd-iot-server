@@ -36,6 +36,7 @@ model User {
   userLogin    UserLogin?
   sessions     UserSession[]
   externals    UserExternal[]
+  projects     ProjMember[]
   createdAt    DateTime       @default(now())
   updatedAt    DateTime       @updatedAt
   deletedAt    DateTime?
@@ -98,17 +99,152 @@ model UserExternal {
 }
 
 model File {
-  id          String    @id @default(uuid())
-  name        String    @db.VarChar(255)
-  path        String    @db.VarChar(255)
-  size        Int
-  mimeType    String    @db.VarChar(255)
-  createdBy   User?     @relation("FilesOfUser", fields: [createdById], references: [id])
-  createdById Int?
-  userAvatar  User?     @relation("AvatarFileOfUser")
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  deletedAt   DateTime?
+  id              String      @id @default(uuid())
+  name            String      @db.VarChar(255)
+  path            String      @db.VarChar(255)
+  size            Int
+  mimeType        String      @db.VarChar(255)
+  createdBy       User?       @relation("FilesOfUser", fields: [createdById], references: [id])
+  createdById     Int?
+  userAvatar      User?       @relation("AvatarFileOfUser")
+  projectImage    Project?    @relation("ImageFileOfProject")
+  ProjDeviceImage ProjDevice? @relation("ImageFileOfProjDevice")
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+  deletedAt       DateTime?
 
   @@map("files")
+}
+
+enum EProjStatus {
+  ACTIVE
+  INACTIVE
+
+  @@map("proj_status")
+}
+
+model Project {
+  id          String       @id @default(uuid())
+  name        String       @db.VarChar(255)
+  description String?
+  status      EProjStatus
+  config      Json
+  members     ProjMember[]
+  imageFileId String?      @unique
+  imageFile   File?        @relation("ImageFileOfProject", fields: [imageFileId], references: [id])
+  devices     ProjDevice[]
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  deletedAt   DateTime?
+
+  @@map("projects")
+}
+
+enum EProjMemRole {
+  OWNER
+  DEVELOPER
+  GUEST
+
+  @@map("proj_mem_role")
+}
+
+model ProjMember {
+  projectId String
+  project   Project      @relation(fields: [projectId], references: [id])
+  userId    Int
+  user      User         @relation(fields: [userId], references: [id])
+  role      EProjMemRole
+
+  @@id([projectId, userId])
+  @@map("proj_members")
+}
+
+enum EProjDevStatus {
+  ONLINE
+  OFFLINE
+  INACTIVE
+
+  @@map("proj_dev_status")
+}
+
+enum EProjDevHardware {
+  ESP8266
+  ESP32
+  RASPBERRY_PI
+
+  @@map("proj_dev_hardware")
+}
+
+enum EProjDevConnection {
+  WIFI
+  ETHERNET
+
+  @@map("proj_dev_connection")
+}
+
+model ProjDevice {
+  id          String             @id @default(uuid())
+  projectId   String
+  project     Project            @relation(fields: [projectId], references: [id])
+  name        String             @db.VarChar(255)
+  imageFileId String?            @unique
+  imageFile   File?              @relation("ImageFileOfProjDevice", fields: [imageFileId], references: [id])
+  config      Json
+  status      EProjDevStatus     @default(OFFLINE)
+  hardware    EProjDevHardware
+  connection  EProjDevConnection
+  lastOnline  DateTime?
+  components  ProjDevComponent[]
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+  deletedAt   DateTime?
+
+  @@map("proj_devices")
+}
+
+enum EProjDevCompPinType {
+  DIGITAL
+  ANALOG
+  VIRTUAL
+
+  @@map("proj_dev_comp_pin_type")
+}
+
+enum EProjDevCompPinMode {
+  INPUT
+  OUTPUT
+  INPUT_PULLUP
+  INPUT_PULLDOWN
+  OUTPUT_OPEN_DRAIN
+  OUTPUT_OPEN_SOURCE
+
+  @@map("proj_dev_comp_pin_mode")
+}
+
+enum EProjDevCompDataType {
+  BOOLEAN
+  INTEGER
+  FLOAT
+  STRING
+
+  @@map("proj_dev_comp_data_type")
+}
+
+model ProjDevComponent {
+  id        String               @id @default(uuid())
+  deviceId  String
+  device    ProjDevice           @relation(fields: [deviceId], references: [id])
+  name      String               @db.VarChar(255)
+  config    Json
+  pinType   EProjDevCompPinType
+  pinMode   EProjDevCompPinMode
+  dataType  EProjDevCompDataType
+  minVal    Float?
+  maxVal    Float?
+  unit      String?
+  createdAt DateTime             @default(now())
+  updatedAt DateTime             @updatedAt
+  deletedAt DateTime?
+
+  @@map("proj_dev_components")
 }
