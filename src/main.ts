@@ -6,9 +6,6 @@ import {
 } from '@nestjs/platform-fastify';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
-import cors from '@fastify/cors';
-import multipart from '@fastify/multipart';
-
 import { TAppConfig } from '@configs/app.config';
 
 import { AppModule } from './app.module';
@@ -34,8 +31,8 @@ async function bootstrap() {
 
   app.setGlobalPrefix(apiPrefix);
 
-  app.register(multipart);
-  app.register(cors);
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  app.register(require('@fastify/multipart'));
 
   app.useGlobalFilters(new GlobalExceptionsFilter());
   app.useGlobalPipes(new CValidationPipe());

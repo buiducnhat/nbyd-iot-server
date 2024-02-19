@@ -8,9 +8,9 @@ export class PrismaService extends PrismaClient implements OnModuleInit {
     'File',
     'User',
     'Project',
-    'ProjDevice',
-    'ProjDevComponent',
-    'ProjMember',
+    'ProjectMember',
+    'Device',
+    'Datastream',
   ];
 
   async onModuleInit() {

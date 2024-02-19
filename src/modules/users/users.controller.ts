@@ -35,8 +35,8 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { UserBasicDto, UserDetailDto } from './dto/user.dto';
 import { UsersService } from './users.service';
 
-@ApiTags('Users')
 @Controller('users')
+@ApiTags('Users')
 @JwtAuth()
 @ApiBearerAuth()
 @UseInterceptors(TransformResponseInterceptor)
