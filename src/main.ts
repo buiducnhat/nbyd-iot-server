@@ -6,6 +6,7 @@ import {
 } from '@nestjs/platform-fastify';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
+import cors from '@fastify/cors';
 import multipart from '@fastify/multipart';
 
 import { TAppConfig } from '@configs/app.config';
@@ -32,7 +33,10 @@ async function bootstrap() {
   const apiPrefix = configService.getOrThrow<TAppConfig>('app').apiPrefix;
 
   app.setGlobalPrefix(apiPrefix);
+
   app.register(multipart);
+  app.register(cors);
+
   app.useGlobalFilters(new GlobalExceptionsFilter());
   app.useGlobalPipes(new CValidationPipe());
 

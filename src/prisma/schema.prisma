@@ -10,38 +10,33 @@ datasource db {
 enum ERole {
   ADMIN
   USER
-
-  @@map("erole")
 }
 
 enum EGender {
   MALE
   FEMALE
   OTHER
-
-  @@map("egender")
 }
 
 model User {
-  id           Int            @id @default(autoincrement())
-  firstName    String         @db.VarChar(255)
-  lastName     String?        @db.VarChar(255)
+  id           Int             @id @default(autoincrement())
+  firstName    String          @db.VarChar(50)
+  lastName     String?         @db.VarChar(50)
   gender       EGender?
   dateOfBirth  DateTime?
-  avatarFileId String?        @unique
-  avatarFile   File?          @relation("AvatarFileOfUser", fields: [avatarFileId], references: [id])
-  createdFiles File[]         @relation("FilesOfUser")
-  phoneNumber  String?        @db.VarChar(255)
-  roles        ERole[]        @default([USER])
+  avatarFileId String?         @unique
+  avatarFile   File?           @relation("AvatarFileOfUser", fields: [avatarFileId], references: [id])
+  createdFiles File[]          @relation("FilesOfUser")
+  phoneNumber  String?         @db.VarChar(15)
+  roles        ERole[]         @default([USER])
   userLogin    UserLogin?
   sessions     UserSession[]
   externals    UserExternal[]
-  projects     ProjMember[]
-  createdAt    DateTime       @default(now())
-  updatedAt    DateTime       @updatedAt
-  deletedAt    DateTime?
+  projects     ProjectMember[]
 
-  @@map("users")
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
 }
 
 model UserLogin {
@@ -55,33 +50,29 @@ model UserLogin {
   password             String
   passwordResetToken   String?
   passwordResetTokenAt DateTime?
-  createdAt            DateTime  @default(now())
-  updatedAt            DateTime  @updatedAt
-  deletedAt            DateTime?
 
-  @@map("user_logins")
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
 }
 
 model UserSession {
-  id           String    @id @default(uuid())
+  id           String   @id @default(uuid())
   userId       Int
-  user         User      @relation(fields: [userId], references: [id])
+  user         User     @relation(fields: [userId], references: [id])
   refreshToken String
   expiredAt    DateTime
   userAgent    String?
   userIp       String?
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
-  deletedAt    DateTime?
 
-  @@map("user_sessions")
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
 }
 
 enum EUserExternalProvider {
   GOOGLE
   FACEBOOK
-
-  @@map("euser_external_provider")
 }
 
 model UserExternal {
@@ -91,160 +82,144 @@ model UserExternal {
   provider      EUserExternalProvider
   providerId    String
   providerToken String?
-  createdAt     DateTime              @default(now())
-  updatedAt     DateTime              @updatedAt
-  deletedAt     DateTime?
 
-  @@map("user_externals")
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
 }
 
 model File {
-  id              String      @id @default(uuid())
-  name            String      @db.VarChar(255)
-  path            String      @db.VarChar(255)
-  size            Int
-  mimeType        String      @db.VarChar(255)
-  createdBy       User?       @relation("FilesOfUser", fields: [createdById], references: [id])
-  createdById     Int?
-  userAvatar      User?       @relation("AvatarFileOfUser")
-  projectImage    Project?    @relation("ImageFileOfProject")
-  ProjDeviceImage ProjDevice? @relation("ImageFileOfProjDevice")
-  createdAt       DateTime    @default(now())
-  updatedAt       DateTime    @updatedAt
-  deletedAt       DateTime?
+  id           String   @id @default(uuid())
+  name         String   @db.VarChar(255)
+  path         String   @db.VarChar(255)
+  size         Int
+  mimeType     String   @db.VarChar(50)
+  createdBy    User?    @relation("FilesOfUser", fields: [createdById], references: [id])
+  createdById  Int?
+  userAvatar   User?    @relation("AvatarFileOfUser")
+  projectImage Project? @relation("ImageFileOfProject")
+  deviceImage  Device?  @relation("ImageFileOfDevice")
 
-  @@map("files")
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
 }
 
 enum EProjStatus {
   ACTIVE
   INACTIVE
-
-  @@map("proj_status")
 }
 
 model Project {
-  id          String       @id @default(uuid())
-  name        String       @db.VarChar(255)
-  description String?
-  status      EProjStatus
-  config      Json
-  members     ProjMember[]
-  imageFileId String?      @unique
-  imageFile   File?        @relation("ImageFileOfProject", fields: [imageFileId], references: [id])
-  devices     ProjDevice[]
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
-  deletedAt   DateTime?
+  id              String          @id @default(uuid())
+  name            String          @db.VarChar(50)
+  description     String?         @db.VarChar(255)
+  metaData        Json?
+  status          EProjStatus     @default(ACTIVE)
+  webDashboard    Json?
+  mobileDashboard Json?
+  members         ProjectMember[]
+  imageFileId     String?         @unique
+  imageFile       File?           @relation("ImageFileOfProject", fields: [imageFileId], references: [id])
+  devices         Device[]
 
-  @@map("projects")
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
 }
 
-enum EProjMemRole {
+enum EProjectMemberRole {
   OWNER
   DEVELOPER
   GUEST
-
-  @@map("proj_mem_role")
 }
 
-model ProjMember {
+model ProjectMember {
   projectId String
-  project   Project      @relation(fields: [projectId], references: [id])
+  project   Project            @relation(fields: [projectId], references: [id])
   userId    Int
-  user      User         @relation(fields: [userId], references: [id])
-  role      EProjMemRole
+  user      User               @relation(fields: [userId], references: [id])
+  role      EProjectMemberRole
 
   @@id([projectId, userId])
-  @@map("proj_members")
 }
 
-enum EProjDevStatus {
+enum EDeviceStatus {
   ONLINE
   OFFLINE
-  INACTIVE
-
-  @@map("proj_dev_status")
 }
 
-enum EProjDevHardware {
+enum EDeviceHardware {
   ESP8266
   ESP32
   RASPBERRY_PI
-
-  @@map("proj_dev_hardware")
 }
 
-enum EProjDevConnection {
+enum EDeviceConnection {
   WIFI
   ETHERNET
-
-  @@map("proj_dev_connection")
 }
 
-model ProjDevice {
-  id          String             @id @default(uuid())
-  projectId   String
-  project     Project            @relation(fields: [projectId], references: [id])
-  name        String             @db.VarChar(255)
-  imageFileId String?            @unique
-  imageFile   File?              @relation("ImageFileOfProjDevice", fields: [imageFileId], references: [id])
-  config      Json
-  status      EProjDevStatus     @default(OFFLINE)
-  hardware    EProjDevHardware
-  connection  EProjDevConnection
-  lastOnline  DateTime?
-  components  ProjDevComponent[]
-  createdAt   DateTime           @default(now())
-  updatedAt   DateTime           @updatedAt
-  deletedAt   DateTime?
+model Device {
+  id              String            @id @default(uuid())
+  projectId       String
+  project         Project           @relation(fields: [projectId], references: [id])
+  name            String            @db.VarChar(50)
+  description     String?           @db.VarChar(255)
+  authToken       String?           @unique
+  authTokenExpiry DateTime?
+  imageFileId     String?           @unique
+  imageFile       File?             @relation("ImageFileOfDevice", fields: [imageFileId], references: [id])
+  status          EDeviceStatus     @default(OFFLINE)
+  hardware        EDeviceHardware
+  connection      EDeviceConnection
+  metaData        Json?
+  lastOnline      DateTime?
+  datastreams     Datastream[]
 
-  @@map("proj_devices")
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
 }
 
-enum EProjDevCompPinType {
+enum EDatastreamPinType {
   DIGITAL
   ANALOG
   VIRTUAL
-
-  @@map("proj_dev_comp_pin_type")
 }
 
-enum EProjDevCompPinMode {
+enum EDatastreamPinMode {
   INPUT
   OUTPUT
   INPUT_PULLUP
   INPUT_PULLDOWN
-  OUTPUT_OPEN_DRAIN
-  OUTPUT_OPEN_SOURCE
-
-  @@map("proj_dev_comp_pin_mode")
 }
 
-enum EProjDevCompDataType {
+enum EDatastreamDataType {
   BOOLEAN
   INTEGER
   FLOAT
   STRING
-
-  @@map("proj_dev_comp_data_type")
 }
 
-model ProjDevComponent {
-  id        String               @id @default(uuid())
-  deviceId  String
-  device    ProjDevice           @relation(fields: [deviceId], references: [id])
-  name      String               @db.VarChar(255)
-  config    Json
-  pinType   EProjDevCompPinType
-  pinMode   EProjDevCompPinMode
-  dataType  EProjDevCompDataType
-  minVal    Float?
-  maxVal    Float?
-  unit      String?
-  createdAt DateTime             @default(now())
-  updatedAt DateTime             @updatedAt
-  deletedAt DateTime?
+model Datastream {
+  id             String               @id @default(uuid())
+  deviceId       String
+  device         Device               @relation(fields: [deviceId], references: [id])
+  name           String               @db.VarChar(50)
+  iconId         Int                  @default(0)
+  color          String               @default("#ffffff") @db.VarChar(7)
+  pinType        EDatastreamPinType
+  pinMode        EDatastreamPinMode?
+  dataType       EDatastreamDataType?
+  minValue       Float?
+  maxValue       Float?
+  defaultValue   String?
+  unit           String?              @db.VarChar(50)
+  enabled        Boolean              @default(true)
+  enabledHistory Boolean              @default(false)
 
-  @@map("proj_dev_components")
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
 }

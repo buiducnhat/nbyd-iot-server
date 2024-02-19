@@ -19,8 +19,9 @@ import {
 import { User } from '@prisma/client';
 
 import {
-  ApiPaginatedRestResponse,
-  ApiRestResponse,
+  ApiPaginatedResponse,
+  ApiResponse,
+  ApiUpdatedResponse,
 } from '@shared/rest-response';
 
 import { CurrentUser } from '@src/decorators/current-user.decorator';
@@ -43,37 +44,37 @@ export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Get('admin-paginated')
-  @ApiPaginatedRestResponse(UserBasicDto)
+  @ApiPaginatedResponse(UserBasicDto)
   async adminPaginated(@Query() query: AdminGetUsersDto) {
     return this.usersService.adminGetPaginated(query);
   }
 
   @Get('admin-one/:id')
-  @ApiRestResponse(UserDetailDto)
+  @ApiResponse(UserDetailDto)
   async adminGet(@Param('id') id: number) {
     return this.usersService.adminGetOne(id);
   }
 
   @Post('admin-create')
-  @ApiRestResponse(null)
+  @ApiResponse(UserBasicDto)
   async adminCreate(@Body() input: CreateUserDto) {
     return this.usersService.adminCreate(input);
   }
 
   @Patch('admin-update/:id')
-  @ApiRestResponse(null)
+  @ApiResponse(UserBasicDto)
   async adminUpdate(@Param('id') id: number, @Body() input: UpdateUserDto) {
     return this.usersService.adminUpdate(id, input);
   }
 
   @Delete('admin-delete/:id')
-  @ApiRestResponse(null)
+  @ApiUpdatedResponse()
   async adminDelete(@Param('id') id: number) {
     return this.usersService.adminDelete(id);
   }
 
   @Delete('admin-delete-many')
-  @ApiRestResponse(null)
+  @ApiUpdatedResponse()
   async adminDeleteMany(@Body() input: DeleteManyUsersDto) {
     return this.usersService.adminDeleteMany(input);
   }
@@ -91,7 +92,7 @@ export class UsersController {
       },
     },
   })
-  @ApiRestResponse(null)
+  @ApiResponse(UserBasicDto)
   @UseInterceptors(FileInterceptor('file'))
   async changeAvatar(
     @CurrentUser() user: User,

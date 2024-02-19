@@ -137,7 +137,7 @@ export class UsersService {
   }
 
   public async adminCreate(input: CreateUserDto) {
-    await this.prisma.user.create({
+    return await this.prisma.user.create({
       data: input,
       include: {
         userLogin: true,
@@ -148,7 +148,7 @@ export class UsersService {
   }
 
   public async adminUpdate(id: string | number, input: UpdateUserDto) {
-    await this.prisma.user.update({
+    return await this.prisma.user.update({
       where: {
         id: Number(id),
       },
@@ -162,7 +162,7 @@ export class UsersService {
   }
 
   public async adminDelete(id: string | number) {
-    await this.prisma.user.delete({
+    return await this.prisma.user.delete({
       where: {
         id: Number(id),
       },
@@ -192,7 +192,7 @@ export class UsersService {
       size: uploaded.bytes,
     });
 
-    await this.prisma.user.update({
+    return await this.prisma.user.update({
       where: {
         id: userId,
       },

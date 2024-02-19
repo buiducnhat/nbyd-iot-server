@@ -4,8 +4,8 @@ import { ERole } from '@prisma/client';
 import { Transform, Type } from 'class-transformer';
 import { IsNumber, IsOptional, IsString } from 'class-validator';
 
-import { TSearchInput } from '@shared/search';
 import { TPaginatedInput } from '@shared/types/paginated.type';
+import { TSearchInput } from '@shared/types/search.type';
 
 export class AdminGetUsersDto implements TPaginatedInput, TSearchInput {
   @IsOptional()

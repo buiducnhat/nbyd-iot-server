@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsString } from 'class-validator';
+import { IsInt, IsJWT, IsNotEmpty, IsString } from 'class-validator';
 
 export class TokenAuthInputDto {
   @IsString()
@@ -11,8 +11,15 @@ export class TokenAuthInputDto {
 }
 
 export class TokenAuthResponseDto {
+  @IsJWT()
   accessToken: string;
+
+  @IsInt()
   accessTokenExpiresIn: number;
+
+  @IsString()
   refreshToken: string;
+
+  @IsInt()
   refreshTokenExpiresIn: number;
 }

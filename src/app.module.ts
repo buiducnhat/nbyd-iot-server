@@ -7,13 +7,13 @@ import authConfig from '@configs/auth.config';
 import cloudinaryConfig from '@configs/cloudinary.config';
 
 import { AuthModule } from '@modules/auth/auth.module';
+import { FilesModule } from '@modules/files/files.module';
+import { ProjectsModule } from '@modules/projects/projects.module';
+import { UsersModule } from '@modules/users/users.module';
 
 import { CloudinaryModule } from '@src/cloudinary/cloudinary.module';
 import { HealthsController } from '@src/healths/health.controller';
-
-import { FilesModule } from './modules/files/files.module';
-import { UsersModule } from './modules/users/users.module';
-import { PrismaModule } from './prisma/prisma.module';
+import { PrismaModule } from '@src/prisma/prisma.module';
 
 @Module({
   imports: [
@@ -28,6 +28,7 @@ import { PrismaModule } from './prisma/prisma.module';
     AuthModule,
     UsersModule,
     FilesModule,
+    ProjectsModule,
   ],
   controllers: [HealthsController],
   providers: [],

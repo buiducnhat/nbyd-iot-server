@@ -1,4 +1,4 @@
-import { IsJWT } from 'class-validator';
+import { IsInt, IsJWT } from 'class-validator';
 
 export class RefreshTokenDto {
   @IsJWT()
@@ -6,6 +6,9 @@ export class RefreshTokenDto {
 }
 
 export class RefreshTokenResponseDto {
+  @IsJWT()
   accessToken: string;
+
+  @IsInt()
   accessTokenExpiresIn: number;
 }

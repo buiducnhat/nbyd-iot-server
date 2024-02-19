@@ -8,11 +8,11 @@ import {
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
 import { ERole, User } from '@prisma/client';
 
-import { RestResponse } from '@shared/rest-response';
+import { ApiResponse, RestResponse } from '@shared/rest-response';
 
 import { CurrentUser } from '@src/decorators/current-user.decorator';
 import { JwtAuth } from '@src/decorators/jwt-auth.decorator';
@@ -32,10 +32,7 @@ export class AuthController {
 
   @Post('/token-auth')
   @HttpCode(HttpStatus.OK)
-  @ApiResponse({
-    status: HttpStatus.OK,
-    type: TokenAuthResponseDto,
-  })
+  @ApiResponse(TokenAuthResponseDto)
   @UseInterceptors(TransformResponseInterceptor)
   async tokenAuth(
     @Body() input: TokenAuthInputDto,
@@ -44,10 +41,7 @@ export class AuthController {
   }
 
   @Post('/register')
-  @ApiResponse({
-    status: HttpStatus.CREATED,
-    type: Boolean,
-  })
+  @ApiResponse(Boolean)
   @UseInterceptors(TransformResponseInterceptor)
   async register(@Body() registerDto: RegisterInputDto): Promise<boolean> {
     return this.authService.register(registerDto);
@@ -55,6 +49,7 @@ export class AuthController {
 
   @Get('/me')
   @ApiBearerAuth()
+  @ApiResponse(Boolean)
   @JwtAuth()
   @UseInterceptors(TransformResponseInterceptor)
   async me(@CurrentUser() currentUser: User) {
