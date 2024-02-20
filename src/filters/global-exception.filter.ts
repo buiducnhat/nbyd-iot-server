@@ -11,13 +11,13 @@ import { HttpArgumentsHost } from '@nestjs/common/interfaces/features/arguments-
 import { FastifyReply } from 'fastify';
 
 import { CHttpException } from '@shared/custom-http-exception';
-import { RestResponse } from '@shared/rest-response';
+import { TransformResponse } from '@shared/response';
 
 const handleReply = (
   reply: FastifyReply,
   exception: HttpException | CHttpException | Error,
 ): void => {
-  const responseBody = RestResponse.internalServerError(
+  const responseBody = TransformResponse.internalServerError(
     'Internal Server Error',
   );
 

@@ -1,27 +1,12 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
 
 import { ERole } from '@prisma/client';
-import { Transform, Type } from 'class-transformer';
-import { IsNumber, IsOptional, IsString } from 'class-validator';
+import { Transform } from 'class-transformer';
+import { IsOptional } from 'class-validator';
 
-import { TPaginatedInput } from '@shared/types/paginated.type';
-import { TSearchInput } from '@shared/types/search.type';
+import { PaginatedSearchSortInput } from '@shared/base-get-input';
 
-export class AdminGetUsersDto implements TPaginatedInput, TSearchInput {
-  @IsOptional()
-  @IsNumber()
-  @Type(() => Number)
-  skip?: number = 0;
-
-  @IsOptional()
-  @IsNumber()
-  @Type(() => Number)
-  take?: number = 10;
-
-  @IsOptional()
-  @IsString()
-  search?: string;
-
+export class AdminGetUsersDto extends PaginatedSearchSortInput {
   @IsOptional()
   @ApiPropertyOptional({
     description: 'List of role',

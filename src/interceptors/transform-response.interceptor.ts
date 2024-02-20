@@ -8,19 +8,19 @@ import {
 import { Observable, map } from 'rxjs';
 
 import { RestResponseCode } from '@shared/constants/rest-response-code.constant';
-import { RestResponse } from '@shared/rest-response';
+import { TransformResponse } from '@shared/response';
 
 @Injectable()
 export class TransformResponseInterceptor<T>
-  implements NestInterceptor<T, RestResponse<T>>
+  implements NestInterceptor<T, TransformResponse<T>>
 {
   intercept(
     context: ExecutionContext,
     next: CallHandler,
-  ): Observable<RestResponse<T>> {
+  ): Observable<TransformResponse<T>> {
     return next.handle().pipe(
       map((res) => {
-        if (res instanceof RestResponse) {
+        if (res instanceof TransformResponse) {
           return res;
         } else {
           return {

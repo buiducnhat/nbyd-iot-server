@@ -3,6 +3,8 @@ import { Injectable, Logger } from '@nestjs/common';
 import { MemoryStorageFile } from '@blazity/nest-file-fastify';
 import { Prisma } from '@prisma/client';
 
+import { PaginatedData } from '@shared/paginated';
+
 import { FilesService } from '@modules/files/files.service';
 
 import { CloudinaryService } from '@src/cloudinary/cloudinary.service';
@@ -96,10 +98,7 @@ export class UsersService {
       },
     });
 
-    return {
-      total,
-      items,
-    };
+    return new PaginatedData(total, items);
   }
 
   public async adminGetOne(id: number | string) {

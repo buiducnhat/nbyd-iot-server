@@ -1,8 +1,8 @@
 import { IsOptional, IsString, MaxLength } from 'class-validator';
 
-import { TSearchInput } from '@shared/types/search.type';
+import { SearchInput } from '@shared/base-get-input';
 
-export class GetListProjectDto implements TSearchInput {
+export class GetListProjectDto implements SearchInput {
   @IsOptional()
   @IsString()
   @MaxLength(50)

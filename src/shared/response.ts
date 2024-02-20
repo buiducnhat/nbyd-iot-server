@@ -9,7 +9,7 @@ import {
 
 import { RestResponseCode } from '@shared/constants/rest-response-code.constant';
 
-export class RestResponse<T> {
+export class TransformResponse<T> {
   @ApiPropertyOptional({ type: 'string' })
   public message: string | null;
 
@@ -30,8 +30,8 @@ export class RestResponse<T> {
     data: T | null,
     message: string | null = 'Ok',
     params: string[] | null = null,
-  ): RestResponse<T> {
-    const res = new RestResponse<T>();
+  ): TransformResponse<T> {
+    const res = new TransformResponse<T>();
     res.message = message;
     res.code = RestResponseCode.OK;
     res.params = params;
@@ -40,8 +40,8 @@ export class RestResponse<T> {
     return res;
   }
 
-  public static internalServerError(message: string): RestResponse<null> {
-    const res = new RestResponse<null>();
+  public static internalServerError(message: string): TransformResponse<null> {
+    const res = new TransformResponse<null>();
     res.message = message;
     res.code = RestResponseCode.INTERNAL_SERVER_ERROR;
     res.params = null;
@@ -53,12 +53,12 @@ export class RestResponse<T> {
 
 export const ApiResponse = <TModel extends Type<any>>(model: TModel) => {
   return applyDecorators(
-    ApiExtraModels(RestResponse, model),
+    ApiExtraModels(TransformResponse, model),
     ApiOkResponse({
       description: 'Ok',
       schema: {
         allOf: [
-          { $ref: getSchemaPath(RestResponse) },
+          { $ref: getSchemaPath(TransformResponse) },
           {
             properties: {
               data: { $ref: getSchemaPath(model) },
@@ -72,12 +72,12 @@ export const ApiResponse = <TModel extends Type<any>>(model: TModel) => {
 
 export const ApiArrayResponse = <TModel extends Type<any>>(model: TModel) => {
   return applyDecorators(
-    ApiExtraModels(RestResponse, model),
+    ApiExtraModels(TransformResponse, model),
     ApiOkResponse({
       description: 'Ok',
       schema: {
         allOf: [
-          { $ref: getSchemaPath(RestResponse) },
+          { $ref: getSchemaPath(TransformResponse) },
           {
             properties: {
               data: { type: 'array', items: { $ref: getSchemaPath(model) } },
@@ -93,12 +93,12 @@ export const ApiPaginatedResponse = <TModel extends Type<any>>(
   model: TModel,
 ) => {
   return applyDecorators(
-    ApiExtraModels(RestResponse, model),
+    ApiExtraModels(TransformResponse, model),
     ApiOkResponse({
       description: 'Ok',
       schema: {
         allOf: [
-          { $ref: getSchemaPath(RestResponse) },
+          { $ref: getSchemaPath(TransformResponse) },
           {
             properties: {
               data: {
@@ -123,12 +123,12 @@ export const ApiPaginatedResponse = <TModel extends Type<any>>(
 
 export const ApiUpdatedResponse = () => {
   return applyDecorators(
-    ApiExtraModels(RestResponse),
+    ApiExtraModels(TransformResponse),
     ApiOkResponse({
       description: 'Ok',
       schema: {
         allOf: [
-          { $ref: getSchemaPath(RestResponse) },
+          { $ref: getSchemaPath(TransformResponse) },
           {
             properties: {
               data: {

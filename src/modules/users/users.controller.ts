@@ -22,7 +22,7 @@ import {
   ApiPaginatedResponse,
   ApiResponse,
   ApiUpdatedResponse,
-} from '@shared/rest-response';
+} from '@shared/response';
 
 import { CurrentUser } from '@src/decorators/current-user.decorator';
 import { JwtAuth } from '@src/decorators/jwt-auth.decorator';

@@ -12,7 +12,7 @@ import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
 import { ERole, User } from '@prisma/client';
 
-import { ApiResponse, RestResponse } from '@shared/rest-response';
+import { ApiResponse, TransformResponse } from '@shared/response';
 
 import { CurrentUser } from '@src/decorators/current-user.decorator';
 import { JwtAuth } from '@src/decorators/jwt-auth.decorator';
@@ -62,7 +62,9 @@ export class AuthController {
   @JwtAuth()
   @UseInterceptors(TransformResponseInterceptor)
   async admin() {
-    return RestResponse.ok({ data: { message: 'Admin route for testing' } });
+    return TransformResponse.ok({
+      data: { message: 'Admin route for testing' },
+    });
   }
 
   @Get('/facebook')
