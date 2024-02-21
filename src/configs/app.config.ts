@@ -1,6 +1,6 @@
 import { registerAs } from '@nestjs/config';
 
-import { IsInt, IsOptional, IsString, IsUrl } from 'class-validator';
+import { IsBoolean, IsInt, IsOptional, IsString, IsUrl } from 'class-validator';
 
 import validateConfig from '@shared/validator-config';
 
@@ -13,7 +13,9 @@ export type TAppConfig = {
   nodeEnv: ENodeEnv;
   host: string;
   port: number;
-  bcryptSalt: number;
+  enableTLS: boolean;
+  sslCertPath: string;
+  sslKeyPath: string;
   apiPrefix: string;
 };
 
@@ -26,9 +28,17 @@ class AppConfigValidator {
   @IsOptional()
   PORT?: number;
 
-  @IsInt()
+  @IsBoolean()
   @IsOptional()
-  BCRYPT_SALT?: number;
+  ENABLE_TLS?: boolean;
+
+  @IsString()
+  @IsOptional()
+  SSL_CERT_PATH?: string;
+
+  @IsString()
+  @IsOptional()
+  SSL_KEY_PATH?: string;
 
   @IsString()
   @IsOptional()
@@ -42,7 +52,9 @@ export default registerAs<TAppConfig>('app', () => {
     nodeEnv: (process.env.NODE_ENV as ENodeEnv) || ENodeEnv.DEVELOPMENT,
     host: process.env.HOST || 'localhost',
     port: parseInt(process.env.PORT) || 4000,
-    bcryptSalt: parseInt(process.env.BCRYPT_SALT) || 10,
+    enableTLS: process.env.ENABLE_TLS === 'true',
+    sslCertPath: process.env.SSL_CERT_PATH,
+    sslKeyPath: process.env.SSL_KEY_PATH,
     apiPrefix: process.env.API_PREFIX || 'api',
   };
 });

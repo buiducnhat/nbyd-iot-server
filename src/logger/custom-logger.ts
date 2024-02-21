@@ -53,4 +53,4 @@ if (process.env.NODE_ENV === 'production') {
   );
 }
 
-export const CustomLogger = WinstonModule.createLogger({ transports });
+export const CLogger = WinstonModule.createLogger({ transports });
