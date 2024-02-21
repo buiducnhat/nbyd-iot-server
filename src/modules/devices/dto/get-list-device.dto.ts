@@ -1,3 +1,3 @@
 import { SearchInput } from '@shared/base-get-input';
 
-export class GetListProjectDto extends SearchInput {}
+export class GetListDeviceDto extends SearchInput {}

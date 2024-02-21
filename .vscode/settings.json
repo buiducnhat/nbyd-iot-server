@@ -4,6 +4,7 @@
     "Cloudinary",
     "Datastream",
     "fastify",
-    "metatype"
+    "metatype",
+    "NBYD"
   ]
 }

@@ -8,6 +8,7 @@ import { PrismaService } from '@src/prisma/prisma.service';
 
 import { CreateProjectDto } from './dto/create-project.dto';
 import { GetListProjectDto } from './dto/get-list-project.dto';
+import { UpdateProjectDto } from './dto/update-project.dto';
 
 @Injectable()
 export class ProjectsService {
@@ -86,6 +87,49 @@ export class ProjectsService {
         members: {
           some: {
             userId: user.id,
+          },
+        },
+      },
+    });
+  }
+
+  async update(id: string, input: UpdateProjectDto, user: User) {
+    return this.prisma.project.update({
+      where: {
+        id,
+        OR: [
+          {
+            members: {
+              some: {
+                userId: user.id,
+                role: 'OWNER',
+              },
+            },
+          },
+          {
+            members: {
+              some: {
+                userId: user.id,
+                role: 'DEVELOPER',
+              },
+            },
+          },
+        ],
+      },
+      data: {
+        ...input,
+      },
+    });
+  }
+
+  async delete(id: string, user: User) {
+    return this.prisma.project.delete({
+      where: {
+        id,
+        members: {
+          some: {
+            userId: user.id,
+            role: 'OWNER',
           },
         },
       },

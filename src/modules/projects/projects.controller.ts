@@ -1,8 +1,10 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
+  Patch,
   Post,
   Query,
   UseInterceptors,
@@ -17,6 +19,7 @@ import { TransformResponseInterceptor } from '@src/interceptors/transform-respon
 
 import { CreateProjectDto } from './dto/create-project.dto';
 import { GetListProjectDto } from './dto/get-list-project.dto';
+import { UpdateProjectDto } from './dto/update-project.dto';
 import { ProjectsService } from './projects.service';
 
 @Controller('projects')
@@ -37,8 +40,22 @@ export class ProjectsController {
     return this.projectsService.getList(query, user);
   }
 
-  @Get(':id')
+  @Get('/:id')
   async getProjectById(@Param('id') id: string, @CurrentUser() user: User) {
     return this.projectsService.getProjectById(id, user);
+  }
+
+  @Patch('/:id')
+  async update(
+    @Param('id') id: string,
+    @Body() input: UpdateProjectDto,
+    @CurrentUser() user: User,
+  ) {
+    return this.projectsService.update(id, input, user);
+  }
+
+  @Delete('/:id')
+  async delete(@Param('id') id: string, @CurrentUser() user: User) {
+    return this.projectsService.delete(id, user);
   }
 }

@@ -14,6 +14,7 @@ import { UsersModule } from '@modules/users/users.module';
 import { CloudinaryModule } from '@src/cloudinary/cloudinary.module';
 import { HealthsController } from '@src/healths/health.controller';
 import { PrismaModule } from '@src/prisma/prisma.module';
+import { DevicesModule } from './modules/devices/devices.module';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { PrismaModule } from '@src/prisma/prisma.module';
     UsersModule,
     FilesModule,
     ProjectsModule,
+    DevicesModule,
   ],
   controllers: [HealthsController],
   providers: [],
