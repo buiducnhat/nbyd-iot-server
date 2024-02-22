@@ -13,12 +13,15 @@ import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
 import { User } from '@prisma/client';
 
+import { ApiArrayResponse, ApiResponse } from '@shared/response';
+
 import { CurrentUser } from '@src/decorators/current-user.decorator';
 import { JwtAuth } from '@src/decorators/jwt-auth.decorator';
 import { TransformResponseInterceptor } from '@src/interceptors/transform-response.interceptor';
 
 import { CreateProjectDto } from './dto/create-project.dto';
 import { GetListProjectDto } from './dto/get-list-project.dto';
+import { ProjectBasicDto, ProjectDetailDto } from './dto/project.dto';
 import { UpdateProjectDto } from './dto/update-project.dto';
 import { ProjectsService } from './projects.service';
 
@@ -31,21 +34,25 @@ export class ProjectsController {
   constructor(private readonly projectsService: ProjectsService) {}
 
   @Post()
+  @ApiResponse(ProjectBasicDto)
   async create(@Body() input: CreateProjectDto, @CurrentUser() user: User) {
     return this.projectsService.create(input, user);
   }
 
   @Get()
+  @ApiArrayResponse(ProjectBasicDto)
   async getList(@Query() query: GetListProjectDto, @CurrentUser() user: User) {
     return this.projectsService.getList(query, user);
   }
 
   @Get('/:id')
+  @ApiResponse(ProjectDetailDto)
   async getProjectById(@Param('id') id: string, @CurrentUser() user: User) {
     return this.projectsService.getProjectById(id, user);
   }
 
   @Patch('/:id')
+  @ApiResponse(ProjectBasicDto)
   async update(
     @Param('id') id: string,
     @Body() input: UpdateProjectDto,
@@ -55,6 +62,7 @@ export class ProjectsController {
   }
 
   @Delete('/:id')
+  @ApiResponse(ProjectBasicDto)
   async delete(@Param('id') id: string, @CurrentUser() user: User) {
     return this.projectsService.delete(id, user);
   }

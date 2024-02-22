@@ -1,11 +1,15 @@
 import { Injectable } from '@nestjs/common';
 
 import { User } from '@prisma/client';
+import uuid from 'uuid';
+
+import { prismaExclude } from '@shared/helpers/prisma.helper';
 
 import { PrismaService } from '@src/prisma/prisma.service';
 
 import { CreateDeviceDto } from './dto/create-device.dto';
 import { GetListDeviceDto } from './dto/get-list-device.dto';
+import { ReGenTokenDto } from './dto/re-gen-token.dto';
 import { UpdateDeviceDto } from './dto/update-device.dto';
 
 @Injectable()
@@ -16,6 +20,7 @@ export class DevicesService {
     return this.prisma.device.create({
       data: {
         ...input,
+        authToken: uuid.v4(),
         project: {
           connect: {
             id: projectId,
@@ -45,6 +50,21 @@ export class DevicesService {
 
   async getDetail(id: string, projectId: string, user: User) {
     return this.prisma.device.findFirst({
+      select: {
+        ...prismaExclude('Device', ['deletedAt']),
+        imageFile: {
+          select: {
+            id: true,
+            name: true,
+            path: true,
+            mimeType: true,
+            size: true,
+          },
+        },
+        datastreams: {
+          select: { ...prismaExclude('Datastream', ['deletedAt']) },
+        },
+      },
       where: {
         id,
         projectId,
@@ -128,6 +148,32 @@ export class DevicesService {
             },
           },
         },
+      },
+    });
+  }
+
+  async reGenAuthToken(
+    id: string,
+    input: ReGenTokenDto,
+    projectId: string,
+    user: User,
+  ) {
+    return this.prisma.device.update({
+      where: {
+        id,
+        projectId,
+        project: {
+          members: {
+            some: {
+              userId: user.id,
+              role: 'OWNER',
+            },
+          },
+        },
+      },
+      data: {
+        authToken: uuid.v4(),
+        authTokenExpiry: input.authTokenExpiry,
       },
     });
   }
