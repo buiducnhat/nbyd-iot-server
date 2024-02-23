@@ -7,7 +7,7 @@ import {
   getSchemaPath,
 } from '@nestjs/swagger';
 
-import { RestResponseCode } from '@shared/constants/rest-response-code.constant';
+import { ApiResponseCode } from '@shared/constants/api-response-code.constant';
 
 export class TransformResponse<T> {
   @ApiPropertyOptional({ type: 'string' })
@@ -33,7 +33,7 @@ export class TransformResponse<T> {
   ): TransformResponse<T> {
     const res = new TransformResponse<T>();
     res.message = message;
-    res.code = RestResponseCode.OK;
+    res.code = ApiResponseCode.OK;
     res.params = params;
     res.data = data;
 
@@ -43,7 +43,7 @@ export class TransformResponse<T> {
   public static internalServerError(message: string): TransformResponse<null> {
     const res = new TransformResponse<null>();
     res.message = message;
-    res.code = RestResponseCode.INTERNAL_SERVER_ERROR;
+    res.code = ApiResponseCode.INTERNAL_SERVER_ERROR;
     res.params = null;
     res.data = null;
 

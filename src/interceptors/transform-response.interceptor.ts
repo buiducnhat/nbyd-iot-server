@@ -7,7 +7,7 @@ import {
 
 import { Observable, map } from 'rxjs';
 
-import { RestResponseCode } from '@shared/constants/rest-response-code.constant';
+import { ApiResponseCode } from '@shared/constants/api-response-code.constant';
 import { TransformResponse } from '@shared/response';
 
 @Injectable()
@@ -25,7 +25,7 @@ export class TransformResponseInterceptor<T>
         } else {
           return {
             message: null,
-            code: RestResponseCode.OK,
+            code: ApiResponseCode.OK,
             params: null,
             data: res || null,
           };

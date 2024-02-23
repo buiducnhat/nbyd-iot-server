@@ -7,6 +7,7 @@ import { User } from '@prisma/client';
 import { TAuthConfig } from '@configs/auth.config';
 import { TConfigs } from '@configs/index';
 
+import { ApiResponseCode } from '@shared/constants/api-response-code.constant';
 import { CHttpException } from '@shared/custom-http-exception';
 import { compareHash, generateHash } from '@shared/helpers/string.helper';
 
@@ -101,6 +102,7 @@ export class AuthService {
         AuthService.name,
         HttpStatus.UNAUTHORIZED,
         'Wrong password',
+        ApiResponseCode.WRONG_PASSWORD,
       );
     }
 

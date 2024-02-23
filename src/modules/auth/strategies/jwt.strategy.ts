@@ -7,7 +7,7 @@ import { ExtractJwt, Strategy } from 'passport-jwt';
 import { TAuthConfig } from '@configs/auth.config';
 import { TConfigs } from '@configs/index';
 
-import { RestResponseCode } from '@shared/constants/rest-response-code.constant';
+import { ApiResponseCode } from '@shared/constants/api-response-code.constant';
 import { CUnauthorizedException } from '@shared/custom-http-exception';
 import { TJwtPayload } from '@shared/types/jwt-payload.type';
 
@@ -27,7 +27,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       throw new CUnauthorizedException(
         JwtStrategy.name,
         'Unauthorized',
-        RestResponseCode.UNAUTHORIZED,
+        ApiResponseCode.UNAUTHORIZED,
       );
     }
 

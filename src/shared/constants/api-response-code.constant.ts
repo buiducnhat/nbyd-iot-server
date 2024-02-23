@@ -1,4 +1,4 @@
-export const RestResponseCode = {
+export const ApiResponseCode = {
   OK: 0,
   INTERNAL_SERVER_ERROR: 1,
   UNAUTHORIZED: 2,

@@ -9,7 +9,7 @@ import {
 import { plainToInstance } from 'class-transformer';
 import { validate } from 'class-validator';
 
-import { RestResponseCode } from '@shared/constants/rest-response-code.constant';
+import { ApiResponseCode } from '@shared/constants/api-response-code.constant';
 import { CBadRequestException } from '@shared/custom-http-exception';
 
 @Injectable()
@@ -38,7 +38,7 @@ export class CValidationPipe implements PipeTransform<any> {
       throw new CBadRequestException(
         argumentMetaData.metatype.name,
         'Validation failed',
-        RestResponseCode.BAD_REQUEST,
+        ApiResponseCode.BAD_REQUEST,
         errors.map((error) => error.constraints),
       );
     }
