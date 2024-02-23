@@ -44,6 +44,7 @@ export class AuthService {
         AuthService.name,
         HttpStatus.CONFLICT,
         'Username or Email already exists',
+        ApiResponseCode.USER_ALREADY_EXISTS,
       );
     }
 
@@ -89,6 +90,7 @@ export class AuthService {
         AuthService.name,
         HttpStatus.UNAUTHORIZED,
         'Username or Email not found',
+        ApiResponseCode.USER_NOT_FOUND,
       );
     }
 
