@@ -14,6 +14,35 @@ import { UpdateProjectDto } from './dto/update-project.dto';
 export class ProjectsService {
   constructor(private readonly prisma: PrismaService) {}
 
+  editorWhereFilter(user: User): any {
+    return {
+      members: {
+        some: {
+          OR: [
+            {
+              userId: user.id,
+              role: 'OWNER',
+            },
+            {
+              userId: user.id,
+              role: 'DEVELOPER',
+            },
+          ],
+        },
+      },
+    };
+  }
+
+  inWhereFilter(user: User) {
+    return {
+      members: {
+        some: {
+          userId: user.id,
+        },
+      },
+    };
+  }
+
   async create(input: CreateProjectDto, user: User) {
     return this.prisma.project.create({
       data: {
@@ -40,11 +69,7 @@ export class ProjectsService {
         ]),
       },
       where: {
-        members: {
-          some: {
-            userId: user.id,
-          },
-        },
+        ...this.inWhereFilter(user),
         OR: input.search
           ? [
               { name: { contains: input.search } },
@@ -84,11 +109,7 @@ export class ProjectsService {
       },
       where: {
         id,
-        members: {
-          some: {
-            userId: user.id,
-          },
-        },
+        ...this.inWhereFilter(user),
       },
     });
   }
@@ -97,24 +118,7 @@ export class ProjectsService {
     return this.prisma.project.update({
       where: {
         id,
-        OR: [
-          {
-            members: {
-              some: {
-                userId: user.id,
-                role: 'OWNER',
-              },
-            },
-          },
-          {
-            members: {
-              some: {
-                userId: user.id,
-                role: 'DEVELOPER',
-              },
-            },
-          },
-        ],
+        ...this.editorWhereFilter(user),
       },
       data: {
         ...input,

@@ -1,12 +1,15 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 
 import { User } from '@prisma/client';
 import uuid from 'uuid';
 
 import { prismaExclude } from '@shared/helpers/prisma.helper';
 
+import { ProjectsService } from '@modules/projects/projects.service';
+
 import { PrismaService } from '@src/prisma/prisma.service';
 
+import { CreateDatastreamDto } from './dto/create-datastream.dto';
 import { CreateDeviceDto } from './dto/create-device.dto';
 import { GetListDeviceDto } from './dto/get-list-device.dto';
 import { ReGenTokenDto } from './dto/re-gen-token.dto';
@@ -14,7 +17,10 @@ import { UpdateDeviceDto } from './dto/update-device.dto';
 
 @Injectable()
 export class DevicesService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    @Inject(ProjectsService) private readonly projectsService: ProjectsService,
+  ) {}
 
   async create(input: CreateDeviceDto, projectId: string, user: User) {
     return this.prisma.device.create({
@@ -24,24 +30,7 @@ export class DevicesService {
         project: {
           connect: {
             id: projectId,
-            OR: [
-              {
-                members: {
-                  some: {
-                    userId: user.id,
-                    role: 'OWNER',
-                  },
-                },
-              },
-              {
-                members: {
-                  some: {
-                    userId: user.id,
-                    role: 'DEVELOPER',
-                  },
-                },
-              },
-            ],
+            ...this.projectsService.editorWhereFilter(user),
           },
         },
       },
@@ -69,11 +58,7 @@ export class DevicesService {
         id,
         projectId,
         project: {
-          members: {
-            some: {
-              userId: user.id,
-            },
-          },
+          ...this.projectsService.inWhereFilter(user),
         },
       },
     });
@@ -84,11 +69,7 @@ export class DevicesService {
       where: {
         projectId,
         project: {
-          members: {
-            some: {
-              userId: user.id,
-            },
-          },
+          ...this.projectsService.inWhereFilter(user),
         },
         name: input.search
           ? {
@@ -111,24 +92,7 @@ export class DevicesService {
         id,
         projectId,
         project: {
-          OR: [
-            {
-              members: {
-                some: {
-                  userId: user.id,
-                  role: 'OWNER',
-                },
-              },
-            },
-            {
-              members: {
-                some: {
-                  userId: user.id,
-                  role: 'DEVELOPER',
-                },
-              },
-            },
-          ],
+          ...this.projectsService.editorWhereFilter(user),
         },
       },
       data: input,
@@ -163,17 +127,34 @@ export class DevicesService {
         id,
         projectId,
         project: {
-          members: {
-            some: {
-              userId: user.id,
-              role: 'OWNER',
-            },
-          },
+          ...this.projectsService.editorWhereFilter(user),
         },
       },
       data: {
         authToken: uuid.v4(),
         authTokenExpiry: input.authTokenExpiry,
+      },
+    });
+  }
+
+  async createDatastream(
+    id: string,
+    projectId: string,
+    input: CreateDatastreamDto,
+    user: User,
+  ) {
+    return this.prisma.datastream.create({
+      data: {
+        ...input,
+        device: {
+          connect: {
+            id,
+            projectId,
+            project: {
+              ...this.projectsService.editorWhereFilter(user),
+            },
+          },
+        },
       },
     });
   }
