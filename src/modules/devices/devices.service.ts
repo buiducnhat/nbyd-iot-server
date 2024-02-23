@@ -9,7 +9,6 @@ import { ProjectsService } from '@modules/projects/projects.service';
 
 import { PrismaService } from '@src/prisma/prisma.service';
 
-import { CreateDatastreamDto } from './dto/create-datastream.dto';
 import { CreateDeviceDto } from './dto/create-device.dto';
 import { GetListDeviceDto } from './dto/get-list-device.dto';
 import { ReGenTokenDto } from './dto/re-gen-token.dto';
@@ -64,7 +63,7 @@ export class DevicesService {
     });
   }
 
-  async getList(projectId: string, input: GetListDeviceDto, user: User) {
+  async getList(input: GetListDeviceDto, projectId: string, user: User) {
     return this.prisma.device.findMany({
       where: {
         projectId,
@@ -82,8 +81,8 @@ export class DevicesService {
   }
 
   async update(
-    id: string,
     input: UpdateDeviceDto,
+    id: string,
     projectId: string,
     user: User,
   ) {
@@ -117,8 +116,8 @@ export class DevicesService {
   }
 
   async reGenAuthToken(
-    id: string,
     input: ReGenTokenDto,
+    id: string,
     projectId: string,
     user: User,
   ) {
@@ -133,28 +132,6 @@ export class DevicesService {
       data: {
         authToken: uuid.v4(),
         authTokenExpiry: input.authTokenExpiry,
-      },
-    });
-  }
-
-  async createDatastream(
-    id: string,
-    projectId: string,
-    input: CreateDatastreamDto,
-    user: User,
-  ) {
-    return this.prisma.datastream.create({
-      data: {
-        ...input,
-        device: {
-          connect: {
-            id,
-            projectId,
-            project: {
-              ...this.projectsService.editorWhereFilter(user),
-            },
-          },
-        },
       },
     });
   }

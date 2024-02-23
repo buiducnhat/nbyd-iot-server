@@ -114,7 +114,7 @@ export class ProjectsService {
     });
   }
 
-  async update(id: string, input: UpdateProjectDto, user: User) {
+  async update(input: UpdateProjectDto, id: string, user: User) {
     return this.prisma.project.update({
       where: {
         id,

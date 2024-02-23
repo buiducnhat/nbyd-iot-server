@@ -58,7 +58,7 @@ export class ProjectsController {
     @Body() input: UpdateProjectDto,
     @CurrentUser() user: User,
   ) {
-    return this.projectsService.update(id, input, user);
+    return this.projectsService.update(input, id, user);
   }
 
   @Delete('/:id')

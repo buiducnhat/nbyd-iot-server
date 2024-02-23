@@ -20,9 +20,7 @@ import { JwtAuth } from '@src/decorators/jwt-auth.decorator';
 import { TransformResponseInterceptor } from '@src/interceptors/transform-response.interceptor';
 
 import { DevicesService } from './devices.service';
-import { CreateDatastreamDto } from './dto/create-datastream.dto';
 import { CreateDeviceDto } from './dto/create-device.dto';
-import { DatastreamBasicDto } from './dto/datastream.dto';
 import { DeviceBasicDto } from './dto/device.dto';
 import { GetListDeviceDto } from './dto/get-list-device.dto';
 import { ReGenTokenDto } from './dto/re-gen-token.dto';
@@ -53,7 +51,7 @@ export class DevicesController {
     @Query() query: GetListDeviceDto,
     @CurrentUser() user: User,
   ) {
-    return this.deviceService.getList(projectId, query, user);
+    return this.deviceService.getList(query, projectId, user);
   }
 
   @Get('/:id')
@@ -74,7 +72,7 @@ export class DevicesController {
     @Body() input: UpdateDeviceDto,
     @CurrentUser() user: User,
   ) {
-    return this.deviceService.update(id, input, projectId, user);
+    return this.deviceService.update(input, id, projectId, user);
   }
 
   @Delete('/:id')
@@ -95,17 +93,6 @@ export class DevicesController {
     @Body() input: ReGenTokenDto,
     @CurrentUser() user: User,
   ) {
-    return this.deviceService.reGenAuthToken(id, input, projectId, user);
-  }
-
-  @Post('/:id/datastreams/')
-  @ApiResponse(DatastreamBasicDto)
-  async createDatastream(
-    @Param('projectId') projectId: string,
-    @Param('id') id: string,
-    @Body() input: CreateDatastreamDto,
-    @CurrentUser() user: User,
-  ) {
-    return this.deviceService.createDatastream(id, projectId, input, user);
+    return this.deviceService.reGenAuthToken(input, id, projectId, user);
   }
 }

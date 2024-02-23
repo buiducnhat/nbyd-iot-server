@@ -16,6 +16,8 @@ import { CloudinaryModule } from '@src/cloudinary/cloudinary.module';
 import { HealthsController } from '@src/healths/health.controller';
 import { PrismaModule } from '@src/prisma/prisma.module';
 
+import { DatastreamsModule } from './modules/datastreams/datastreams.module';
+
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -31,6 +33,7 @@ import { PrismaModule } from '@src/prisma/prisma.module';
     FilesModule,
     ProjectsModule,
     DevicesModule,
+    DatastreamsModule,
   ],
   controllers: [HealthsController],
   providers: [],
