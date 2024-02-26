@@ -1,10 +1,11 @@
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+
 import {
   EDatastreamDataType,
-  EDatastreamPinMode,
-  EDatastreamPinType,
+  EDatastreamMode,
+  EDatastreamType,
 } from '@prisma/client';
 import {
-  IsEnum,
   IsHexColor,
   IsInt,
   IsNumber,
@@ -29,15 +30,14 @@ export class DatastreamBasicDto {
   @IsHexColor()
   color: string;
 
-  @IsEnum(EDatastreamPinType)
-  pinType: EDatastreamPinType;
+  @ApiProperty({ enum: EDatastreamType })
+  type: EDatastreamType;
 
   @IsOptional()
-  @IsEnum(EDatastreamPinMode)
-  pinMode?: EDatastreamPinMode;
+  @ApiPropertyOptional({ enum: EDatastreamMode })
+  mode?: EDatastreamMode;
 
-  @IsOptional()
-  @IsEnum(EDatastreamDataType)
+  @ApiPropertyOptional({ enum: EDatastreamDataType })
   dataType?: EDatastreamDataType;
 
   @IsOptional()

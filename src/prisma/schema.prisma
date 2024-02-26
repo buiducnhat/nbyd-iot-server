@@ -105,7 +105,7 @@ model File {
   deletedAt DateTime?
 }
 
-enum EProjStatus {
+enum EProjectStatus {
   ACTIVE
   INACTIVE
 }
@@ -115,7 +115,8 @@ model Project {
   name            String          @db.VarChar(50)
   description     String?         @db.VarChar(255)
   metaData        Json?
-  status          EProjStatus     @default(ACTIVE)
+  status          EProjectStatus  @default(ACTIVE)
+  location        Float[]         @default([])
   webDashboard    Json?
   mobileDashboard Json?
   members         ProjectMember[]
@@ -182,13 +183,14 @@ model Device {
   deletedAt DateTime?
 }
 
-enum EDatastreamPinType {
+enum EDatastreamType {
   DIGITAL
   ANALOG
   VIRTUAL
+  ZIGBEE
 }
 
-enum EDatastreamPinMode {
+enum EDatastreamMode {
   INPUT
   OUTPUT
   INPUT_PULLUP
@@ -200,6 +202,7 @@ enum EDatastreamDataType {
   INTEGER
   FLOAT
   STRING
+  JSON
 }
 
 model Datastream {
@@ -209,8 +212,8 @@ model Datastream {
   name           String               @db.VarChar(50)
   iconId         Int                  @default(0)
   color          String               @default("#ffffff") @db.VarChar(7)
-  pinType        EDatastreamPinType
-  pinMode        EDatastreamPinMode?
+  type           EDatastreamType
+  mode           EDatastreamMode?
   dataType       EDatastreamDataType?
   minValue       Float?
   maxValue       Float?
@@ -219,7 +222,6 @@ model Datastream {
   enabled        Boolean              @default(true)
   enabledHistory Boolean              @default(false)
 
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  deletedAt DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

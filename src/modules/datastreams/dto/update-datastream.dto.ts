@@ -1,8 +1,4 @@
-import {
-  EDatastreamDataType,
-  EDatastreamPinMode,
-  EDatastreamPinType,
-} from '@prisma/client';
+import { EDatastreamDataType, EDatastreamMode } from '@prisma/client';
 import {
   IsBoolean,
   IsEnum,
@@ -29,12 +25,8 @@ export class UpdateDatastreamDto {
   color?: string;
 
   @IsOptional()
-  @IsEnum(EDatastreamPinType)
-  pinType?: EDatastreamPinType;
-
-  @IsOptional()
-  @IsEnum(EDatastreamPinMode)
-  pinMode?: EDatastreamPinMode;
+  @IsEnum(EDatastreamMode)
+  mode?: EDatastreamMode;
 
   @IsOptional()
   @IsEnum(EDatastreamDataType)

@@ -1,7 +1,7 @@
 import {
   EDatastreamDataType,
-  EDatastreamPinMode,
-  EDatastreamPinType,
+  EDatastreamMode,
+  EDatastreamType,
 } from '@prisma/client';
 import {
   IsBoolean,
@@ -27,12 +27,12 @@ export class CreateDatastreamDto {
   @IsHexColor()
   color?: string;
 
-  @IsEnum(EDatastreamPinType)
-  pinType: EDatastreamPinType;
+  @IsEnum(EDatastreamType)
+  type: EDatastreamType;
 
   @IsOptional()
-  @IsEnum(EDatastreamPinMode)
-  pinMode?: EDatastreamPinMode;
+  @IsEnum(EDatastreamMode)
+  mode?: EDatastreamMode;
 
   @IsOptional()
   @IsEnum(EDatastreamDataType)

@@ -1,7 +1,9 @@
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+
 import {
   EDatastreamDataType,
-  EDatastreamPinMode,
-  EDatastreamPinType,
+  EDatastreamMode,
+  EDatastreamType,
 } from '@prisma/client';
 import {
   IsBoolean,
@@ -27,13 +29,16 @@ export class CreateDatastreamDto {
   @IsHexColor()
   color?: string;
 
-  @IsEnum(EDatastreamPinType)
-  pinType: EDatastreamPinType;
+  @ApiProperty({ enum: EDatastreamType })
+  @IsEnum(EDatastreamType)
+  type: EDatastreamType;
 
+  @ApiPropertyOptional({ enum: EDatastreamMode })
   @IsOptional()
-  @IsEnum(EDatastreamPinMode)
-  pinMode?: EDatastreamPinMode;
+  @IsEnum(EDatastreamMode)
+  mode?: EDatastreamMode;
 
+  @ApiPropertyOptional({ enum: EDatastreamDataType })
   @IsOptional()
   @IsEnum(EDatastreamDataType)
   dataType?: EDatastreamDataType;

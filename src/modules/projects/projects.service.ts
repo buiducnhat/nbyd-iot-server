@@ -67,6 +67,11 @@ export class ProjectsService {
           'mobileDashboard',
           'webDashboard',
         ]),
+        _count: {
+          select: {
+            devices: true,
+          },
+        },
       },
       where: {
         ...this.inWhereFilter(user),

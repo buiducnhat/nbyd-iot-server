@@ -49,9 +49,7 @@ export class DevicesService {
             size: true,
           },
         },
-        datastreams: {
-          select: { ...prismaExclude('Datastream', ['deletedAt']) },
-        },
+        datastreams: true,
       },
       where: {
         id,

@@ -1,7 +1,8 @@
-import { $Enums, Prisma, Project } from '@prisma/client';
+import { ApiProperty } from '@nestjs/swagger';
+
+import { EProjectStatus, Prisma, Project } from '@prisma/client';
 import {
   IsDateString,
-  IsEnum,
   IsInt,
   IsJSON,
   IsObject,
@@ -22,8 +23,8 @@ export class ProjectBasicDto implements Partial<Project> {
   @IsString()
   description: string | null;
 
-  @IsEnum($Enums.EProjStatus)
-  status: $Enums.EProjStatus;
+  @ApiProperty({ enum: EProjectStatus })
+  status?: EProjectStatus;
 
   @IsOptional()
   @IsObject()
@@ -31,6 +32,11 @@ export class ProjectBasicDto implements Partial<Project> {
 
   @IsDateString()
   createdAt: Date;
+
+  @ApiProperty()
+  _count: {
+    devices: number;
+  };
 }
 
 export class ProjectDetailDto extends ProjectBasicDto {
