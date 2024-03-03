@@ -4,14 +4,7 @@ import { Prisma, PrismaClient } from '@prisma/client';
 
 @Injectable()
 export class PrismaService extends PrismaClient implements OnModuleInit {
-  private readonly needModels: Prisma.ModelName[] = [
-    'File',
-    'User',
-    'Project',
-    'ProjectMember',
-    'Device',
-    'Datastream',
-  ];
+  private readonly softDeletedModels: Prisma.ModelName[] = ['File', 'User'];
 
   async onModuleInit() {
     await this.$connect();
@@ -21,7 +14,7 @@ export class PrismaService extends PrismaClient implements OnModuleInit {
     /***********************************/
 
     this.$use(async (params, next) => {
-      if (this.needModels.includes(params.model)) {
+      if (this.softDeletedModels.includes(params.model)) {
         if (params.action === 'findUnique' || params.action === 'findFirst') {
           // Change to findFirst - you cannot filter
           // by anything except ID / unique with findUnique
@@ -50,7 +43,7 @@ export class PrismaService extends PrismaClient implements OnModuleInit {
     });
 
     this.$use(async (params, next) => {
-      if (this.needModels.includes(params.model)) {
+      if (this.softDeletedModels.includes(params.model)) {
         if (params.action === 'update') {
           // Change to updateMany - you cannot filter
           // by anything except ID / unique with findUnique
@@ -72,7 +65,7 @@ export class PrismaService extends PrismaClient implements OnModuleInit {
 
     this.$use(async (params, next) => {
       // Check incoming query type
-      if (this.needModels.includes(params.model)) {
+      if (this.softDeletedModels.includes(params.model)) {
         if (params.action === 'delete') {
           // Delete queries
           // Change action to an update
