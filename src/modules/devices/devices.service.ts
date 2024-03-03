@@ -1,7 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 
 import { User } from '@prisma/client';
-import uuid from 'uuid';
+import * as uuid from 'uuid';
 
 import { prismaExclude } from '@shared/helpers/prisma.helper';
 

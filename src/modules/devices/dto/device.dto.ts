@@ -1,3 +1,5 @@
+import { ApiProperty } from '@nestjs/swagger';
+
 import {
   EDeviceConnection,
   EDeviceHardware,
@@ -5,13 +7,13 @@ import {
 } from '@prisma/client';
 import {
   IsDate,
-  IsEnum,
   IsObject,
   IsOptional,
   IsString,
   IsUUID,
 } from 'class-validator';
 
+import { DatastreamBasicDto } from '@modules/datastreams/dto/datastream.dto';
 import { FileBasicDto } from '@modules/files/dto/file.dto';
 
 export class DeviceBasicDto {
@@ -28,13 +30,13 @@ export class DeviceBasicDto {
   @IsUUID()
   projectId: string;
 
-  @IsEnum(EDeviceStatus)
+  @ApiProperty({ enum: EDeviceStatus })
   status: EDeviceStatus;
 
-  @IsEnum(EDeviceHardware)
+  @ApiProperty({ enum: EDeviceHardware })
   hardware: EDeviceHardware;
 
-  @IsEnum(EDeviceConnection)
+  @ApiProperty({ enum: EDeviceConnection })
   connection: EDeviceConnection;
 
   @IsString()
@@ -55,4 +57,6 @@ export class DeviceBasicDto {
   @IsOptional()
   @IsDate()
   lastOnline?: Date;
+
+  datastreams: DatastreamBasicDto[];
 }

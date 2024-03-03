@@ -1,22 +1,28 @@
 import {
+  ArrayMaxSize,
+  ArrayMinSize,
   IsJSON,
   IsNotEmpty,
+  IsNumber,
   IsOptional,
-  IsString,
   MaxLength,
 } from 'class-validator';
 
 export class UpdateProjectDto {
   @IsOptional()
-  @IsString()
   @IsNotEmpty()
   @MaxLength(50)
   name?: string;
 
   @IsOptional()
-  @IsString()
   @MaxLength(255)
   description?: string;
+
+  @IsOptional()
+  @ArrayMinSize(2)
+  @ArrayMaxSize(2)
+  @IsNumber({}, { each: true })
+  location?: number[];
 
   @IsOptional()
   @IsJSON()

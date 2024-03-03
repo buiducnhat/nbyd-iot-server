@@ -1,13 +1,24 @@
-import { IsNotEmpty, IsOptional, IsString, MaxLength } from 'class-validator';
+import {
+  ArrayMaxSize,
+  ArrayMinSize,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  MaxLength,
+} from 'class-validator';
 
 export class CreateProjectDto {
-  @IsString()
   @IsNotEmpty()
   @MaxLength(50)
   name: string;
 
-  @IsString()
   @IsOptional()
   @MaxLength(255)
   description?: string;
+
+  @IsOptional()
+  @ArrayMinSize(2)
+  @ArrayMaxSize(2)
+  @IsNumber({}, { each: true })
+  location?: number[];
 }

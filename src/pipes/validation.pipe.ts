@@ -25,7 +25,7 @@ export class CValidationPipe implements PipeTransform<any> {
 
     if (this.needTransform) {
       const defaultPipe = new ValidationPipe({ transform: true });
-      value = defaultPipe.transform(value, argumentMetaData);
+      value = await defaultPipe.transform(value, argumentMetaData);
     }
 
     if (!metatype || !this.toValidate(metatype)) {

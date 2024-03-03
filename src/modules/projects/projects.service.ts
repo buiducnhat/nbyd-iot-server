@@ -104,11 +104,8 @@ export class ProjectsService {
         },
         devices: {
           select: {
-            id: true,
-            name: true,
-            hardware: true,
-            imageFile: { select: { path: true } },
-            createdAt: true,
+            ...prismaExclude('Device', ['deletedAt']),
+            datastreams: true,
           },
         },
       },

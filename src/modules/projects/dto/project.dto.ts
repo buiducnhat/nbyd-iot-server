@@ -10,6 +10,7 @@ import {
   IsString,
 } from 'class-validator';
 
+import { DeviceBasicDto } from '@modules/devices/dto/device.dto';
 import { FileBasicDto } from '@modules/files/dto/file.dto';
 
 export class ProjectBasicDto implements Partial<Project> {
@@ -25,6 +26,14 @@ export class ProjectBasicDto implements Partial<Project> {
 
   @ApiProperty({ enum: EProjectStatus })
   status?: EProjectStatus;
+
+  @ApiProperty({
+    type: 'array',
+    items: { type: 'number' },
+    minLength: 2,
+    maxLength: 2,
+  })
+  location?: number[];
 
   @IsOptional()
   @IsObject()
@@ -55,4 +64,6 @@ export class ProjectDetailDto extends ProjectBasicDto {
   @IsOptional()
   @IsObject()
   imageFile: FileBasicDto | null;
+
+  devices: DeviceBasicDto[];
 }
