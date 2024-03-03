@@ -61,7 +61,6 @@ export class ProjectsService {
     return this.prisma.project.findMany({
       select: {
         ...prismaExclude('Project', [
-          'deletedAt',
           'updatedAt',
           'metaData',
           'mobileDashboard',
@@ -88,7 +87,7 @@ export class ProjectsService {
   async getProjectById(id: string, user: User) {
     return this.prisma.project.findFirst({
       select: {
-        ...prismaExclude('Project', ['deletedAt']),
+        ...prismaExclude('Project', []),
         members: {
           select: {
             role: true,
@@ -103,8 +102,7 @@ export class ProjectsService {
           },
         },
         devices: {
-          select: {
-            ...prismaExclude('Device', ['deletedAt']),
+          include: {
             datastreams: true,
           },
         },

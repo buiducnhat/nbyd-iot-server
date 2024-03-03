@@ -39,7 +39,7 @@ export class DevicesService {
   async getDetail(id: string, projectId: string, user: User) {
     return this.prisma.device.findFirst({
       select: {
-        ...prismaExclude('Device', ['deletedAt']),
+        ...prismaExclude('Device', []),
         imageFile: {
           select: {
             id: true,

@@ -124,8 +124,8 @@ model Project {
   imageFile       File?           @relation("ImageFileOfProject", fields: [imageFileId], references: [id])
   devices         Device[]
 
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 enum EProjectMemberRole {
@@ -177,8 +177,8 @@ model Device {
   lastOnline      DateTime?
   datastreams     Datastream[]
 
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 enum EDatastreamType {
