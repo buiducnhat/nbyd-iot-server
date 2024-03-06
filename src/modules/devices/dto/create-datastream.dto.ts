@@ -33,6 +33,11 @@ export class CreateDatastreamDto {
   @IsEnum(EDatastreamType)
   type: EDatastreamType;
 
+  @IsOptional()
+  @IsString()
+  @MaxLength(10)
+  pin?: string;
+
   @ApiPropertyOptional({ enum: EDatastreamMode })
   @IsOptional()
   @IsEnum(EDatastreamMode)

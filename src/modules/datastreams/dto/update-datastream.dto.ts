@@ -25,6 +25,10 @@ export class UpdateDatastreamDto {
   color?: string;
 
   @IsOptional()
+  @MaxLength(10)
+  pin?: string;
+
+  @IsOptional()
   @IsEnum(EDatastreamMode)
   mode?: EDatastreamMode;
 

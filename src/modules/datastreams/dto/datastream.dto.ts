@@ -33,6 +33,9 @@ export class DatastreamBasicDto {
   @ApiProperty({ enum: EDatastreamType })
   type: EDatastreamType;
 
+  @ApiProperty({ example: 'D0' })
+  pin?: string;
+
   @IsOptional()
   @ApiPropertyOptional({ enum: EDatastreamMode })
   mode?: EDatastreamMode;

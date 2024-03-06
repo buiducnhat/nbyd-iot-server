@@ -136,9 +136,9 @@ enum EProjectMemberRole {
 
 model ProjectMember {
   projectId String
-  project   Project            @relation(fields: [projectId], references: [id])
+  project   Project            @relation(fields: [projectId], references: [id], onDelete: Cascade)
   userId    Int
-  user      User               @relation(fields: [userId], references: [id])
+  user      User               @relation(fields: [userId], references: [id], onDelete: Cascade)
   role      EProjectMemberRole
 
   @@id([projectId, userId])
@@ -211,6 +211,7 @@ model Datastream {
   iconId         Int                  @default(0)
   color          String               @default("#ffffff") @db.VarChar(7)
   type           EDatastreamType
+  pin            String?              @db.VarChar(10)
   mode           EDatastreamMode?
   dataType       EDatastreamDataType?
   minValue       Float?
