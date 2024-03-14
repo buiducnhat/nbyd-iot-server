@@ -5,9 +5,8 @@ import { Prisma } from '@prisma/client';
 
 import { PaginatedData } from '@shared/paginated';
 
-import { FilesService } from '@modules/files/files.service';
+import { CloudinaryService } from '@modules/cloudinary/cloudinary.service';
 
-import { CloudinaryService } from '@src/cloudinary/cloudinary.service';
 import { PrismaService } from '@src/prisma/prisma.service';
 
 import { CreateUserDto } from './dto/create-user.dto';
@@ -22,7 +21,6 @@ export class UsersService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly cloudinaryService: CloudinaryService,
-    private readonly filesService: FilesService,
   ) {}
 
   public async adminGetPaginated(input: AdminGetUsersDto) {
@@ -70,24 +68,7 @@ export class UsersService {
       where: where as any,
       skip: input.skip,
       take: input.take,
-      select: {
-        id: true,
-        firstName: true,
-        lastName: true,
-        roles: true,
-        gender: true,
-        dateOfBirth: true,
-        phoneNumber: true,
-        createdAt: true,
-        avatarFile: {
-          select: {
-            id: true,
-            name: true,
-            path: true,
-            mimeType: true,
-            size: true,
-          },
-        },
+      include: {
         userLogin: {
           select: {
             username: true,
@@ -101,36 +82,15 @@ export class UsersService {
     return new PaginatedData(total, items);
   }
 
-  public async adminGetOne(id: number | string) {
+  public async adminGetOne(id: number) {
     return await this.prisma.user.findFirst({
       where: {
-        id: Number(id),
+        id,
       },
-      select: {
-        id: true,
-        firstName: true,
-        lastName: true,
-        roles: true,
-        gender: true,
-        dateOfBirth: true,
-        phoneNumber: true,
-        createdAt: true,
-        avatarFile: {
-          select: {
-            id: true,
-            name: true,
-            path: true,
-            mimeType: true,
-            size: true,
-          },
-        },
-        userLogin: {
-          select: {
-            username: true,
-            email: true,
-            isEmailVerified: true,
-          },
-        },
+      include: {
+        userLogin: true,
+        externals: true,
+        sessions: true,
       },
     });
   }
@@ -146,10 +106,10 @@ export class UsersService {
     });
   }
 
-  public async adminUpdate(id: string | number, input: UpdateUserDto) {
+  public async adminUpdate(id: number, input: UpdateUserDto) {
     return await this.prisma.user.update({
       where: {
-        id: Number(id),
+        id,
       },
       data: input,
       include: {
@@ -160,10 +120,10 @@ export class UsersService {
     });
   }
 
-  public async adminDelete(id: string | number) {
+  public async adminDelete(id: number) {
     return await this.prisma.user.delete({
       where: {
-        id: Number(id),
+        id,
       },
     });
   }
@@ -172,7 +132,7 @@ export class UsersService {
     await this.prisma.user.deleteMany({
       where: {
         id: {
-          in: input.ids.map((id) => Number(id)),
+          in: input.ids,
         },
       },
     });
@@ -181,37 +141,21 @@ export class UsersService {
   public async updateAvatar(userId: number, file: MemoryStorageFile) {
     const uploaded = await this.cloudinaryService.uploadFile(
       file,
-      'user-avatars',
+      'users/avatars',
     );
-
-    const avatarFile = await this.filesService.create({
-      name: uploaded.original_filename,
-      path: uploaded.url,
-      mimeType: uploaded.format,
-      size: uploaded.bytes,
-    });
 
     return await this.prisma.user.update({
       where: {
         id: userId,
       },
       data: {
-        avatarFile: {
-          connect: {
-            id: avatarFile.id,
-          },
-        },
+        avatarImageId: uploaded.public_id,
+        avatarImageUrl: uploaded.public_id,
       },
-      select: {
-        avatarFile: {
-          select: {
-            id: true,
-            name: true,
-            path: true,
-            mimeType: true,
-            size: true,
-          },
-        },
+      include: {
+        externals: true,
+        sessions: true,
+        userLogin: true,
       },
     });
   }

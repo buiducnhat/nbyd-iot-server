@@ -96,7 +96,8 @@ export class ProjectsService {
                 id: true,
                 firstName: true,
                 lastName: true,
-                avatarFile: { select: { path: true } },
+                avatarImageId: true,
+                avatarImageUrl: true,
               },
             },
           },
@@ -137,6 +138,16 @@ export class ProjectsService {
           },
         },
       },
+    });
+  }
+
+  async updateWebDashboard(webDashboard: any, id: string, user: User) {
+    return this.prisma.project.update({
+      where: {
+        id,
+        ...this.editorWhereFilter(user),
+      },
+      data: webDashboard,
     });
   }
 }

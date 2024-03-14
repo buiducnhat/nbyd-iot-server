@@ -64,7 +64,7 @@ export class DatastreamsController {
     return this.deviceService.delete(id, deviceId, projectId, user);
   }
 
-  @Delete('many')
+  @Delete()
   @ApiResponse(DatastreamBasicDto)
   async deleteMany(
     @Param('projectId') projectId: string,

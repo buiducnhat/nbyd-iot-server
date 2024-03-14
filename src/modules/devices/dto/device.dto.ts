@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 
 import {
+  Device,
   EDeviceConnection,
   EDeviceHardware,
   EDeviceStatus,
@@ -14,9 +15,8 @@ import {
 } from 'class-validator';
 
 import { DatastreamBasicDto } from '@modules/datastreams/dto/datastream.dto';
-import { FileBasicDto } from '@modules/files/dto/file.dto';
 
-export class DeviceBasicDto {
+export class DeviceBasicDto implements Partial<Device> {
   @IsUUID()
   id: string;
 
@@ -48,11 +48,11 @@ export class DeviceBasicDto {
 
   @IsOptional()
   @IsString()
-  imageFileId?: string;
+  imageId?: string;
 
   @IsOptional()
   @IsObject()
-  imageFile?: FileBasicDto;
+  imageUrl?: string;
 
   @IsOptional()
   @IsDate()

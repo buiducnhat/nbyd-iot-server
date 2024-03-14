@@ -22,6 +22,7 @@ import { TransformResponseInterceptor } from '@src/interceptors/transform-respon
 import { CreateProjectDto } from './dto/create-project.dto';
 import { GetListProjectDto } from './dto/get-list-project.dto';
 import { ProjectBasicDto, ProjectDetailDto } from './dto/project.dto';
+import { UpdateProjectWebDashboardDto } from './dto/update-project-web-dashboard.dto';
 import { UpdateProjectDto } from './dto/update-project.dto';
 import { ProjectsService } from './projects.service';
 
@@ -59,6 +60,16 @@ export class ProjectsController {
     @CurrentUser() user: User,
   ) {
     return this.projectsService.update(input, id, user);
+  }
+
+  @Patch('/:id/web-dashboard')
+  @ApiResponse(ProjectBasicDto)
+  async updateWebDashboard(
+    @Param('id') id: string,
+    @Body() input: UpdateProjectWebDashboardDto,
+    @CurrentUser() user: User,
+  ) {
+    return this.projectsService.updateWebDashboard(input, id, user);
   }
 
   @Delete('/:id')

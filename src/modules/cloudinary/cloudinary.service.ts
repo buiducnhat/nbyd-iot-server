@@ -23,9 +23,7 @@ export class CloudinaryService {
             access_mode: 'public',
             folder:
               this.configService.get<TCloudinaryConfig>('cloudinary')
-                .defaultFolder + folder
-                ? `/${folder}`
-                : '',
+                .defaultFolder + (folder ? `/${folder}` : ''),
           },
           (error, result) => {
             if (error) {
@@ -36,33 +34,6 @@ export class CloudinaryService {
           },
         )
         .end(file.buffer);
-    });
-  }
-
-  public async uploadFiles(
-    files: MemoryStorageFile[],
-    folder?: string,
-  ): Promise<UploadApiErrorResponse | UploadApiResponse> {
-    return new Promise((resolve, reject) => {
-      v2.uploader
-        .upload_stream(
-          {
-            access_mode: 'public',
-            folder:
-              this.configService.get<TCloudinaryConfig>('cloudinary')
-                .defaultFolder + folder
-                ? `/${folder}`
-                : '',
-          },
-          (error, result) => {
-            if (error) {
-              return reject(error);
-            }
-
-            return resolve(result);
-          },
-        )
-        .end(files);
     });
   }
 

@@ -11,7 +11,6 @@ import {
 } from 'class-validator';
 
 import { DeviceBasicDto } from '@modules/devices/dto/device.dto';
-import { FileBasicDto } from '@modules/files/dto/file.dto';
 
 export class ProjectBasicDto implements Partial<Project> {
   @IsInt()
@@ -22,7 +21,7 @@ export class ProjectBasicDto implements Partial<Project> {
 
   @IsOptional()
   @IsString()
-  description: string | null;
+  description?: string;
 
   @ApiProperty({ enum: EProjectStatus })
   status?: EProjectStatus;
@@ -37,7 +36,10 @@ export class ProjectBasicDto implements Partial<Project> {
 
   @IsOptional()
   @IsObject()
-  imageFile: FileBasicDto | null;
+  imageId?: string;
+
+  @IsOptional()
+  imageUrl?: string;
 
   @IsDateString()
   createdAt: Date;
@@ -60,10 +62,6 @@ export class ProjectDetailDto extends ProjectBasicDto {
   @IsOptional()
   @IsJSON()
   mobileDashboard: Prisma.JsonValue | null;
-
-  @IsOptional()
-  @IsObject()
-  imageFile: FileBasicDto | null;
 
   devices: DeviceBasicDto[];
 }

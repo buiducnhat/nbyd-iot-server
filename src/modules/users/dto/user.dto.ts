@@ -1,36 +1,49 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 import { EGender, ERole } from '@prisma/client';
 
 export class UserBasicDto {
+  @ApiProperty()
   id: number;
+
+  @ApiProperty()
   firstName: string;
+
+  @ApiPropertyOptional()
   lastName?: string;
+
   @ApiProperty({
     enum: ERole,
     isArray: true,
   })
   roles: ERole[];
-  @ApiProperty({
+
+  @ApiPropertyOptional({
     enum: EGender,
-    required: false,
   })
   gender?: EGender;
+
+  @ApiPropertyOptional()
   dateOfBirth?: Date;
+
+  @ApiPropertyOptional()
   phoneNumber?: string;
-  createdAt: Date;
-  avatarFile?: {
-    id: number;
-    name: string;
-    path: string;
-    mimeType: string;
-    size: number;
-  };
+
+  @ApiPropertyOptional()
+  avatarImageId?: string;
+
+  @ApiPropertyOptional()
+  avatarImageUrl?: string;
+
+  @ApiProperty()
   userLogin: {
     username: string;
     email: string;
     isEmailVerified: boolean;
   };
+
+  @ApiProperty()
+  createdAt: Date;
 }
 
 export class UserDetailDto extends UserBasicDto {

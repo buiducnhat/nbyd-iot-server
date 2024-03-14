@@ -113,15 +113,6 @@ export class AuthService {
         id: userLogin.userId,
       },
       include: {
-        avatarFile: {
-          select: {
-            id: true,
-            name: true,
-            path: true,
-            mimeType: true,
-            size: true,
-          },
-        },
         userLogin: true,
         sessions: true,
         externals: true,

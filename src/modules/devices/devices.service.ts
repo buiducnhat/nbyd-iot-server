@@ -40,15 +40,6 @@ export class DevicesService {
     return this.prisma.device.findFirst({
       select: {
         ...prismaExclude('Device', []),
-        imageFile: {
-          select: {
-            id: true,
-            name: true,
-            path: true,
-            mimeType: true,
-            size: true,
-          },
-        },
         datastreams: true,
       },
       where: {
