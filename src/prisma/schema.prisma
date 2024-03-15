@@ -24,8 +24,8 @@ model User {
   lastName           String?         @db.VarChar(50)
   gender             EGender?
   dateOfBirth        DateTime?
-  avatarimageFileId  String?
-  avatarimageFileUrl String?         @db.Text
+  avatarImageFileId  String?
+  avatarImageFileUrl String?
   phoneNumber        String?         @db.VarChar(15)
   roles              ERole[]         @default([USER])
   userLogin          UserLogin?

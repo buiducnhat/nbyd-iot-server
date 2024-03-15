@@ -30,10 +30,10 @@ export class UserBasicDto {
   phoneNumber?: string;
 
   @ApiPropertyOptional()
-  avatarimageFileId?: string;
+  avatarImageFileFileId?: string;
 
   @ApiPropertyOptional()
-  avatarimageFileUrl?: string;
+  avatarImageFileFileUrl?: string;
 
   @ApiProperty()
   userLogin: {
