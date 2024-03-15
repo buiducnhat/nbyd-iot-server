@@ -149,8 +149,8 @@ export class UsersService {
         id: userId,
       },
       data: {
-        avatarImageId: uploaded.public_id,
-        avatarImageUrl: uploaded.public_id,
+        avatarimageFileId: uploaded.public_id,
+        avatarimageFileUrl: uploaded.public_id,
       },
       include: {
         externals: true,

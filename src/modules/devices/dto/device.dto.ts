@@ -48,11 +48,11 @@ export class DeviceBasicDto implements Partial<Device> {
 
   @IsOptional()
   @IsString()
-  imageId?: string;
+  imageFileId?: string;
 
   @IsOptional()
   @IsObject()
-  imageUrl?: string;
+  imageFileUrl?: string;
 
   @IsOptional()
   @IsDate()

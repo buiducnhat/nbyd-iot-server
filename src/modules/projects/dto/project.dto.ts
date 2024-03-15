@@ -36,10 +36,10 @@ export class ProjectBasicDto implements Partial<Project> {
 
   @IsOptional()
   @IsObject()
-  imageId?: string;
+  imageFileId?: string;
 
   @IsOptional()
-  imageUrl?: string;
+  imageFileUrl?: string;
 
   @IsDateString()
   createdAt: Date;
