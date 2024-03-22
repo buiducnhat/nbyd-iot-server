@@ -6,6 +6,7 @@
     "datastreams",
     "fastify",
     "metatype",
-    "NBYD"
+    "NBYD",
+    "websockets"
   ]
 }

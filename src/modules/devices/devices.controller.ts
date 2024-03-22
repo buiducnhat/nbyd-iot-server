@@ -16,6 +16,7 @@ import { User } from '@prisma/client';
 import { ApiArrayResponse, ApiResponse } from '@shared/response';
 
 import { CurrentUser } from '@src/decorators/current-user.decorator';
+import { IsPublic } from '@src/decorators/is-public.decorator';
 import { JwtAuth } from '@src/decorators/jwt-auth.decorator';
 import { TransformResponseInterceptor } from '@src/interceptors/transform-response.interceptor';
 
@@ -62,6 +63,16 @@ export class DevicesController {
     @CurrentUser() user: User,
   ) {
     return this.deviceService.getDetail(id, projectId, user);
+  }
+
+  @Get('/auth-token/:authToken')
+  @IsPublic()
+  @ApiResponse(DeviceBasicDto)
+  async getByAuthToken(
+    @Param('projectId') projectId: string,
+    @Param('authToken') authToken: string,
+  ) {
+    return this.deviceService.getByAuthToken(authToken, projectId);
   }
 
   @Patch('/:id')

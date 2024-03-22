@@ -52,6 +52,37 @@ export class DevicesService {
     });
   }
 
+  async getByAuthToken(authToken: string, projectId: string) {
+    return this.prisma.device.findUnique({
+      select: {
+        id: true,
+        name: true,
+        hardware: true,
+        connection: true,
+        datastreams: {
+          select: {
+            id: true,
+            enabled: true,
+            pin: true,
+            mode: true,
+            dataType: true,
+          },
+          where: {
+            enabled: true,
+          },
+        },
+      },
+      where: {
+        authToken,
+        projectId,
+        OR: [
+          { authTokenExpiry: null },
+          { authTokenExpiry: { gt: new Date() } },
+        ],
+      },
+    });
+  }
+
   async getList(input: GetListDeviceDto, projectId: string, user: User) {
     return this.prisma.device.findMany({
       where: {

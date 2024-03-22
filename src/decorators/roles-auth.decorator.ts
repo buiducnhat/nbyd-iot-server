@@ -17,5 +17,6 @@ export const RolesAuth = (roles: ERole[]) => {
   }
 
   const guard = new RolesGuardMixin();
+
   return UseGuards(guard);
 };

@@ -198,6 +198,7 @@ model Datastream {
   unit           String?              @db.VarChar(50)
   enabled        Boolean              @default(true)
   enabledHistory Boolean              @default(false)
+  lastValue      String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

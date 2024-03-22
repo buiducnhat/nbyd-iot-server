@@ -17,6 +17,7 @@ import { HealthsController } from '@src/healths/health.controller';
 import { PrismaModule } from '@src/prisma/prisma.module';
 
 import { DatastreamsModule } from './modules/datastreams/datastreams.module';
+import { RealtimeComModule } from './modules/realtime-com/realtime-com.module';
 
 @Module({
   imports: [
@@ -33,6 +34,7 @@ import { DatastreamsModule } from './modules/datastreams/datastreams.module';
     ProjectsModule,
     DevicesModule,
     DatastreamsModule,
+    RealtimeComModule,
   ],
   controllers: [HealthsController],
   providers: [],
