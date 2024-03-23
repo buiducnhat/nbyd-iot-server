@@ -20,7 +20,7 @@ import { DeviceCommandWsDto } from './dto/device-command-ws.dto';
 import { JoinWsRoomProjectDto } from './dto/join-ws-room-project.dto';
 import { RealtimeComService } from './realtime-com.service';
 
-@WebSocketGateway()
+@WebSocketGateway({ cors: true })
 export class RealtimeComGateway {
   @WebSocketServer()
   private readonly server: Server;
@@ -74,7 +74,7 @@ export class RealtimeComGateway {
     @CurrentUser() user: User,
   ) {
     // Check if the datastream is existed
-    const isDatastreamExisted = await this.prisma.datastream.findUnique({
+    const datastream = await this.prisma.datastream.findUnique({
       where: {
         id: input.datastreamId,
         device: {
@@ -86,23 +86,22 @@ export class RealtimeComGateway {
         },
       },
     });
-    if (!isDatastreamExisted) {
+    if (!datastream) {
       return;
     }
 
     // Publish the command to the MQTT broker
-    this.mqttClient.emit(`/nbyd/devices/${input.deviceId}/command`, {
+    this.mqttClient.emit(`/nbyd/devices/${datastream.deviceId}/command`, {
       ...input,
     });
   }
 
   async emitDeviceDataUpdate(
-    deviceId: string,
+    projectId: string,
     datastreamId: string,
     value: string,
   ) {
-    this.server.to(`/projects/${deviceId}`).emit('/devices/data', {
-      deviceId,
+    this.server.to(`/projects/${projectId}`).emit('/devices/data', {
       datastreamId,
       value,
     });

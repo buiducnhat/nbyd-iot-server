@@ -38,7 +38,7 @@ export class JwtAuthWsGuard implements CanActivate {
   }
 
   private extractTokenFromHeader(request: Socket): string | undefined {
-    const token = request.handshake.headers.accessToken as string;
+    const { token } = request.handshake.auth;
 
     return token;
   }

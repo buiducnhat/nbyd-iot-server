@@ -10,6 +10,7 @@ export const userFromContext = (context: ExecutionContext) => {
       return context.switchToHttp().getRequest().user as User;
     case 'rpc':
     case 'ws':
+      return context.switchToWs().getClient().user as User;
     default:
       return context.switchToRpc().getContext().user as User;
   }

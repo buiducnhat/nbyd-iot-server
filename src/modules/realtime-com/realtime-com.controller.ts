@@ -16,12 +16,12 @@ import { RealtimeComService } from './realtime-com.service';
 export class RealtimeComController {
   constructor(private readonly realtimeComService: RealtimeComService) {}
 
-  @EventPattern('/nbyd/devices/+/status', Transport.MQTT)
+  @EventPattern('/nbyd/devices/+/ping', Transport.MQTT)
   @IsPublic()
-  async handleDeviceStatus(@Ctx() ctx: MqttContext) {
+  async handleDevicePing(@Ctx() ctx: MqttContext) {
     const deviceId = ctx.getTopic().split('/')[3];
 
-    this.realtimeComService.updateDeviceStatus(deviceId, 'ONLINE');
+    return this.realtimeComService.handleDevicePing(deviceId);
   }
 
   @EventPattern('/nbyd/devices/+/data', Transport.MQTT)
@@ -32,7 +32,7 @@ export class RealtimeComController {
   ) {
     const deviceId = ctx.getTopic().split('/')[3];
 
-    this.realtimeComService.updateDeviceData(
+    return this.realtimeComService.handleDeviceData(
       deviceId,
       data.datastreamId,
       data.value,

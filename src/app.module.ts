@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { ScheduleModule } from '@nestjs/schedule';
 import { TerminusModule } from '@nestjs/terminus';
 
 import appConfig from '@configs/app.config';
@@ -26,6 +27,7 @@ import { RealtimeComModule } from './modules/realtime-com/realtime-com.module';
       load: [appConfig, authConfig, cloudinaryConfig, mqttConfig],
       envFilePath: ['.env', '.env.development', '.env.production'],
     }),
+    ScheduleModule.forRoot(),
     TerminusModule,
     CloudinaryModule,
     PrismaModule,
