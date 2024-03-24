@@ -73,8 +73,11 @@ export class RealtimeComGateway {
     @MessageBody() input: DeviceCommandWsDto,
     @CurrentUser() user: User,
   ) {
-    // Check if the datastream is existed
-    const datastream = await this.prisma.datastream.findUnique({
+    // Update the last value of the datastream
+    const datastream = await this.prisma.datastream.update({
+      data: {
+        lastValue: input.value,
+      },
       where: {
         id: input.datastreamId,
         device: {

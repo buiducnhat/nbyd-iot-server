@@ -6,7 +6,6 @@ import {
 import {
   IsBoolean,
   IsEnum,
-  IsHexColor,
   IsInt,
   IsNumber,
   IsOptional,
@@ -24,7 +23,7 @@ export class CreateDatastreamDto {
   iconId?: number;
 
   @IsOptional()
-  @IsHexColor()
+  @IsString()
   color?: string;
 
   @IsEnum(EDatastreamType)

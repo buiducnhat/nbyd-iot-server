@@ -1,4 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 import {
   Device,
@@ -6,28 +6,20 @@ import {
   EDeviceHardware,
   EDeviceStatus,
 } from '@prisma/client';
-import {
-  IsDate,
-  IsObject,
-  IsOptional,
-  IsString,
-  IsUUID,
-} from 'class-validator';
 
 import { DatastreamBasicDto } from '@modules/datastreams/dto/datastream.dto';
 
 export class DeviceBasicDto implements Partial<Device> {
-  @IsUUID()
+  @ApiProperty({ example: 'd1e2d3d4-5f6g-7h8i-9j0k-1l2m3n4o5p6' })
   id: string;
 
-  @IsString()
+  @ApiProperty()
   name: string;
 
-  @IsOptional()
-  @IsString()
+  @ApiPropertyOptional()
   description?: string;
 
-  @IsUUID()
+  @ApiProperty({ example: 'd1e2d3d4-5f6g-7h8i-9j0k-1l2m3n4o5p6' })
   projectId: string;
 
   @ApiProperty({ enum: EDeviceStatus })
@@ -39,23 +31,19 @@ export class DeviceBasicDto implements Partial<Device> {
   @ApiProperty({ enum: EDeviceConnection })
   connection: EDeviceConnection;
 
-  @IsString()
+  @ApiProperty()
   authToken: string;
 
-  @IsOptional()
-  @IsDate()
+  @ApiPropertyOptional()
   authTokenExpiry?: Date;
 
-  @IsOptional()
-  @IsString()
+  @ApiPropertyOptional()
   imageFileId?: string;
 
-  @IsOptional()
-  @IsObject()
+  @ApiPropertyOptional()
   imageFileUrl?: string;
 
-  @IsOptional()
-  @IsDate()
+  @ApiPropertyOptional()
   lastOnline?: Date;
 
   datastreams: DatastreamBasicDto[];

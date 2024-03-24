@@ -5,30 +5,22 @@ import {
   EDatastreamMode,
   EDatastreamType,
 } from '@prisma/client';
-import {
-  IsHexColor,
-  IsInt,
-  IsNumber,
-  IsOptional,
-  IsString,
-  IsUUID,
-} from 'class-validator';
 
 export class DatastreamBasicDto {
-  @IsUUID()
+  @ApiProperty({ example: 'd1e2d3d4-5f6g-7h8i-9j0k-1l2m3n4o5p6' })
   id: string;
 
-  @IsUUID()
+  @ApiProperty({ example: 'd1e2d3d4-5f6g-7h8i-9j0k-1l2m3n4o5p6' })
   deviceId: string;
 
-  @IsString()
+  @ApiProperty()
   name: string;
 
-  @IsInt()
-  iconId: number;
+  @ApiPropertyOptional()
+  iconId?: number;
 
-  @IsHexColor()
-  color: string;
+  @ApiPropertyOptional()
+  color?: string;
 
   @ApiProperty({ enum: EDatastreamType })
   type: EDatastreamType;
@@ -36,30 +28,24 @@ export class DatastreamBasicDto {
   @ApiProperty({ example: 'D0' })
   pin?: string;
 
-  @IsOptional()
   @ApiPropertyOptional({ enum: EDatastreamMode })
   mode?: EDatastreamMode;
 
   @ApiPropertyOptional({ enum: EDatastreamDataType })
   dataType?: EDatastreamDataType;
 
-  @IsOptional()
-  @IsNumber()
+  @ApiPropertyOptional()
   minValue?: number;
 
-  @IsOptional()
-  @IsNumber()
+  @ApiPropertyOptional()
   maxValue?: number;
 
-  @IsOptional()
-  @IsString()
+  @ApiPropertyOptional()
   defaultValue?: string;
 
-  @IsOptional()
-  @IsString()
+  @ApiPropertyOptional()
   unit?: string;
 
-  @IsOptional()
-  @IsString()
+  @ApiPropertyOptional()
   description?: string;
 }

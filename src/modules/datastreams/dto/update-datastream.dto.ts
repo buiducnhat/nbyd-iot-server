@@ -2,7 +2,6 @@ import { EDatastreamDataType, EDatastreamMode } from '@prisma/client';
 import {
   IsBoolean,
   IsEnum,
-  IsHexColor,
   IsInt,
   IsNumber,
   IsOptional,
@@ -21,7 +20,7 @@ export class UpdateDatastreamDto {
   iconId?: number;
 
   @IsOptional()
-  @IsHexColor()
+  @IsString()
   color?: string;
 
   @IsOptional()
