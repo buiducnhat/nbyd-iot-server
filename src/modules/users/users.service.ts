@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 
 import { MemoryStorageFile } from '@blazity/nest-file-fastify';
-import { Prisma } from '@prisma/client';
+import { Prisma, User } from '@prisma/client';
 
 import { PaginatedData } from '@shared/paginated';
 
@@ -138,19 +138,20 @@ export class UsersService {
     });
   }
 
-  public async updateAvatar(userId: number, file: MemoryStorageFile) {
-    const uploaded = await this.cloudinaryService.uploadFile(
+  public async updateAvatar(file: MemoryStorageFile, user: User) {
+    const uploaded = await this.cloudinaryService.replaceFile(
+      user.avatarImageFileId,
       file,
       'users/avatars',
     );
 
     return await this.prisma.user.update({
       where: {
-        id: userId,
+        id: user.id,
       },
       data: {
         avatarImageFileId: uploaded.public_id,
-        avatarImageFileUrl: uploaded.public_id,
+        avatarImageFileUrl: uploaded.url,
       },
       include: {
         externals: true,

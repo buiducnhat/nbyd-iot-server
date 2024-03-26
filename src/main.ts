@@ -8,6 +8,7 @@ import {
 } from '@nestjs/platform-fastify';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
+import multiPart from '@fastify/multipart';
 import * as dotenv from 'dotenv';
 import * as fs from 'fs';
 
@@ -59,6 +60,8 @@ async function bootstrap() {
   app.setGlobalPrefix(apiPrefix);
   app.useGlobalFilters(new GlobalExceptionsFilter());
   app.useGlobalPipes(new CValidationPipe());
+
+  await app.register(multiPart);
   // End Global setup
 
   // Swagger setup

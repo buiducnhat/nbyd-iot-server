@@ -32,6 +32,19 @@ export class AuthService {
       this.configService.getOrThrow<TAuthConfig>('auth').refreshTokenExpireIn;
   }
 
+  async getMe(userId: number): Promise<User> {
+    return this.prisma.user.findUnique({
+      where: {
+        id: userId,
+      },
+      include: {
+        sessions: true,
+        userLogin: true,
+        externals: true,
+      },
+    });
+  }
+
   async register(registerDto: RegisterInputDto): Promise<boolean> {
     const userLogin = await this.prisma.userLogin.findFirst({
       where: {

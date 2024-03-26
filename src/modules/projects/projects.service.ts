@@ -1,8 +1,12 @@
 import { Injectable } from '@nestjs/common';
 
+import { MemoryStorageFile } from '@blazity/nest-file-fastify';
 import { User } from '@prisma/client';
 
+import { CNotFoundException } from '@shared/custom-http-exception';
 import { prismaExclude } from '@shared/helpers/prisma.helper';
+
+import { CloudinaryService } from '@modules/cloudinary/cloudinary.service';
 
 import { PrismaService } from '@src/prisma/prisma.service';
 
@@ -12,7 +16,10 @@ import { UpdateProjectDto } from './dto/update-project.dto';
 
 @Injectable()
 export class ProjectsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly cloudinary: CloudinaryService,
+  ) {}
 
   editorWhereFilter(user: User): any {
     return {
@@ -148,6 +155,46 @@ export class ProjectsService {
         ...this.editorWhereFilter(user),
       },
       data: webDashboard,
+    });
+  }
+
+  public async uploadImage(id: string, file: MemoryStorageFile, user: User) {
+    const project = await this.prisma.project.findUnique({
+      where: {
+        id,
+        members: {
+          some: {
+            userId: user.id,
+            role: { in: ['OWNER', 'DEVELOPER'] },
+          },
+        },
+      },
+    });
+
+    if (!project) {
+      throw new CNotFoundException('Project not found');
+    }
+
+    const uploaded = await this.cloudinary.replaceFile(
+      project.imageFileId,
+      file,
+      'projects/images',
+    );
+
+    return await this.prisma.project.update({
+      where: {
+        id,
+        members: {
+          some: {
+            userId: user.id,
+            role: { in: ['OWNER', 'DEVELOPER'] },
+          },
+        },
+      },
+      data: {
+        imageFileId: uploaded.public_id,
+        imageFileUrl: uploaded.url,
+      },
     });
   }
 }

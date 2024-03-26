@@ -98,6 +98,6 @@ export class UsersController {
     @CurrentUser() user: User,
     @UploadedFile() file: MemoryStorageFile,
   ) {
-    return this.usersService.updateAvatar(user.id, file);
+    return this.usersService.updateAvatar(file, user);
   }
 }

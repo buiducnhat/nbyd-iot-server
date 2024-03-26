@@ -53,7 +53,7 @@ export class AuthController {
   @JwtAuth()
   @UseInterceptors(TransformResponseInterceptor)
   async me(@CurrentUser() currentUser: User) {
-    return currentUser;
+    return this.authService.getMe(currentUser.id);
   }
 
   @Get('/admin')

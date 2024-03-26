@@ -37,7 +37,44 @@ export class CloudinaryService {
     });
   }
 
-  public async deleteFile(publicId: string): Promise<void> {
+  public async replaceFile(
+    publicId: string,
+    file: MemoryStorageFile,
+    folder?: string,
+  ): Promise<UploadApiErrorResponse | UploadApiResponse> {
+    try {
+      await this.deleteFile(publicId);
+    } catch (error) {}
+
+    return this.uploadFile(file, folder);
+  }
+
+  public async uploadFiles(
+    files: MemoryStorageFile[],
+    folder?: string,
+  ): Promise<UploadApiErrorResponse | UploadApiResponse> {
+    return new Promise((resolve, reject) => {
+      v2.uploader
+        .upload_stream(
+          {
+            access_mode: 'public',
+            folder:
+              this.configService.get<TCloudinaryConfig>('cloudinary')
+                .defaultFolder + (folder ? `/${folder}` : ''),
+          },
+          (error, result) => {
+            if (error) {
+              return reject(error);
+            }
+
+            return resolve(result);
+          },
+        )
+        .end(files.map((file) => file.buffer));
+    });
+  }
+
+  public async deleteFile(publicId: string): Promise<{ result: string }> {
     return new Promise((resolve, reject) => {
       v2.uploader.destroy(publicId, (error, result) => {
         if (error) {
