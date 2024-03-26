@@ -1,10 +1,13 @@
 import { Inject, Injectable } from '@nestjs/common';
 
+import { MemoryStorageFile } from '@blazity/nest-file-fastify';
 import { User } from '@prisma/client';
 import * as uuid from 'uuid';
 
+import { CNotFoundException } from '@shared/custom-http-exception';
 import { prismaExclude } from '@shared/helpers/prisma.helper';
 
+import { CloudinaryService } from '@modules/cloudinary/cloudinary.service';
 import { ProjectsService } from '@modules/projects/projects.service';
 
 import { PrismaService } from '@src/prisma/prisma.service';
@@ -19,6 +22,7 @@ export class DevicesService {
   constructor(
     private readonly prisma: PrismaService,
     @Inject(ProjectsService) private readonly projectsService: ProjectsService,
+    private readonly cloudinary: CloudinaryService,
   ) {}
 
   async create(input: CreateDeviceDto, projectId: string, user: User) {
@@ -154,6 +158,48 @@ export class DevicesService {
       data: {
         authToken: uuid.v4(),
         authTokenExpiry: input.authTokenExpiry,
+      },
+    });
+  }
+
+  public async uploadImage(
+    file: MemoryStorageFile,
+    id: string,
+    projectId: string,
+    user: User,
+  ) {
+    const device = await this.prisma.device.findUnique({
+      where: {
+        id,
+        project: {
+          id: projectId,
+          members: {
+            some: {
+              userId: user.id,
+              role: { in: ['OWNER', 'DEVELOPER'] },
+            },
+          },
+        },
+      },
+    });
+
+    if (!device) {
+      throw new CNotFoundException('Device not found');
+    }
+
+    const uploaded = await this.cloudinary.replaceFile(
+      device.imageFileId,
+      file,
+      'devices/images',
+    );
+
+    return await this.prisma.device.update({
+      where: {
+        id,
+      },
+      data: {
+        imageFileId: uploaded.public_id,
+        imageFileUrl: uploaded.url,
       },
     });
   }

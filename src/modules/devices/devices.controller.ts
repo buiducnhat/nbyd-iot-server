@@ -9,8 +9,13 @@ import {
   Query,
   UseInterceptors,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiConsumes, ApiTags } from '@nestjs/swagger';
 
+import {
+  FileInterceptor,
+  MemoryStorageFile,
+  UploadedFile,
+} from '@blazity/nest-file-fastify';
 import { User } from '@prisma/client';
 
 import { ApiArrayResponse, ApiResponse } from '@shared/response';
@@ -105,5 +110,29 @@ export class DevicesController {
     @CurrentUser() user: User,
   ) {
     return this.deviceService.reGenAuthToken(input, id, projectId, user);
+  }
+
+  @Patch('/:id/images')
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        file: {
+          type: 'string',
+          format: 'binary',
+        },
+      },
+    },
+  })
+  @ApiResponse(DeviceBasicDto)
+  @UseInterceptors(FileInterceptor('file'))
+  async uploadImage(
+    @CurrentUser() user: User,
+    @Param('projectId') projectId: string,
+    @Param('id') id: string,
+    @UploadedFile() file: MemoryStorageFile,
+  ) {
+    return this.deviceService.uploadImage(file, id, projectId, user);
   }
 }
