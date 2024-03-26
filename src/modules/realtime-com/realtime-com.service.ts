@@ -7,6 +7,7 @@ import { TIME_1_MINUTE } from '@shared/constants/time.constant';
 
 import { PrismaService } from '@src/prisma/prisma.service';
 
+import { DevicePingMqttDto } from './dto/device-ping-mqtt.dto';
 import { RealtimeComGateway } from './realtime-com.gateway';
 
 @Injectable()
@@ -20,11 +21,37 @@ export class RealtimeComService {
     private readonly schedulerRegistry: SchedulerRegistry,
   ) {}
 
-  private async updateDeviceStatus(deviceId: string, status: EDeviceStatus) {
+  private async updateDeviceStatus(
+    deviceId: string,
+    status: EDeviceStatus,
+    data?: DevicePingMqttDto,
+  ) {
+    const device = await this.prisma.device.findUnique({
+      select: {
+        metaData: true,
+      },
+      where: {
+        id: deviceId,
+      },
+    });
+    if (!device) {
+      return;
+    }
+
+    if (!device.metaData) {
+      device.metaData = { ...data.metaData };
+    } else {
+      device.metaData = {
+        ...device.metaData,
+        ...data.metaData,
+      };
+    }
+
     return this.prisma.device.update({
       data: {
         status,
         lastOnline: status === 'ONLINE' ? new Date() : undefined,
+        metaData: device.metaData,
       },
       where: {
         id: deviceId,
@@ -32,9 +59,9 @@ export class RealtimeComService {
     });
   }
 
-  async handleDevicePing(deviceId: string) {
+  async handleDevicePing(deviceId: string, data: DevicePingMqttDto) {
     // Update the device status to online
-    await this.updateDeviceStatus(deviceId, EDeviceStatus.ONLINE);
+    await this.updateDeviceStatus(deviceId, EDeviceStatus.ONLINE, data);
 
     try {
       // Set the device status to offline after time

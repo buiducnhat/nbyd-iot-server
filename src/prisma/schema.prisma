@@ -2,6 +2,11 @@ generator client {
   provider = "prisma-client-js"
 }
 
+generator json {
+  provider     = "prisma-json-types-generator"
+  namespace    = "PrismaJson"
+}
+
 datasource db {
   provider = "postgresql"
   url      = env("DB_URL")
@@ -151,6 +156,7 @@ model Device {
   status          EDeviceStatus     @default(OFFLINE)
   hardware        EDeviceHardware
   connection      EDeviceConnection
+  /// [TDeviceMetaData]
   metaData        Json?
   lastOnline      DateTime?
   datastreams     Datastream[]
