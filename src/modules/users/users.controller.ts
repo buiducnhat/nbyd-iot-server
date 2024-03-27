@@ -7,15 +7,12 @@ import {
   Patch,
   Post,
   Query,
+  UploadedFile,
   UseInterceptors,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiBearerAuth, ApiBody, ApiConsumes, ApiTags } from '@nestjs/swagger';
 
-import {
-  FileInterceptor,
-  MemoryStorageFile,
-  UploadedFile,
-} from '@blazity/nest-file-fastify';
 import { User } from '@prisma/client';
 
 import {
@@ -96,7 +93,7 @@ export class UsersController {
   @UseInterceptors(FileInterceptor('file'))
   async changeAvatar(
     @CurrentUser() user: User,
-    @UploadedFile() file: MemoryStorageFile,
+    @UploadedFile() file: Express.Multer.File,
   ) {
     return this.usersService.updateAvatar(file, user);
   }

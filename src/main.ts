@@ -2,13 +2,8 @@ import { NestApplicationOptions } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
-import {
-  FastifyAdapter,
-  NestFastifyApplication,
-} from '@nestjs/platform-fastify';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
-import multiPart from '@fastify/multipart';
 import * as dotenv from 'dotenv';
 import * as fs from 'fs';
 
@@ -42,11 +37,7 @@ async function bootstrap() {
   }
   // End Enable TLS
 
-  const app = await NestFactory.create<NestFastifyApplication>(
-    AppModule,
-    new FastifyAdapter(),
-    options,
-  );
+  const app = await NestFactory.create(AppModule, options);
 
   // Get app configs
   const configService = app.get(ConfigService);
@@ -60,8 +51,6 @@ async function bootstrap() {
   app.setGlobalPrefix(apiPrefix);
   app.useGlobalFilters(new GlobalExceptionsFilter());
   app.useGlobalPipes(new CValidationPipe());
-
-  await app.register(multiPart);
   // End Global setup
 
   // Swagger setup

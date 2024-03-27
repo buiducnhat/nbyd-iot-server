@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
 
-import { MemoryStorageFile } from '@blazity/nest-file-fastify';
 import { User } from '@prisma/client';
 
 import { CNotFoundException } from '@shared/custom-http-exception';
@@ -158,7 +157,7 @@ export class ProjectsService {
     });
   }
 
-  public async uploadImage(id: string, file: MemoryStorageFile, user: User) {
+  public async uploadImage(id: string, file: Express.Multer.File, user: User) {
     const project = await this.prisma.project.findUnique({
       where: {
         id,

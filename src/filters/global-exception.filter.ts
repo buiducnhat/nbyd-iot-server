@@ -8,13 +8,13 @@ import {
 } from '@nestjs/common';
 import { HttpArgumentsHost } from '@nestjs/common/interfaces/features/arguments-host.interface';
 
-import { FastifyReply } from 'fastify';
+import { Response } from 'express';
 
 import { CHttpException } from '@shared/custom-http-exception';
 import { TransformResponse } from '@shared/response';
 
 const handleReply = (
-  reply: FastifyReply,
+  res: Response,
   exception: HttpException | CHttpException | Error,
 ): void => {
   const responseBody = TransformResponse.internalServerError(
@@ -36,7 +36,7 @@ const handleReply = (
     responseBody.message = exception.message;
   }
 
-  reply.status(statusCode).send(responseBody);
+  res.status(statusCode).send(responseBody);
 };
 
 const handleMessage = (
@@ -74,7 +74,7 @@ export class GlobalExceptionsFilter implements ExceptionFilter {
     handleMessage(exception, this.logger);
 
     const ctx: HttpArgumentsHost = host.switchToHttp();
-    const reply = ctx.getResponse<FastifyReply>();
+    const reply = ctx.getResponse<Response>();
     handleReply(reply, exception);
   }
 }

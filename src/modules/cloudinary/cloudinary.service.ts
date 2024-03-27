@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
-import { MemoryStorageFile } from '@blazity/nest-file-fastify';
 import { UploadApiErrorResponse, UploadApiResponse, v2 } from 'cloudinary';
 
 import { TCloudinaryConfig } from '@configs/cloudinary.config';
@@ -13,7 +12,7 @@ export class CloudinaryService {
   constructor(private readonly configService: ConfigService<TConfigs>) {}
 
   public async uploadFile(
-    file: MemoryStorageFile,
+    file: Express.Multer.File,
     folder?: string,
   ): Promise<UploadApiErrorResponse | UploadApiResponse> {
     return new Promise((resolve, reject) => {
@@ -39,7 +38,7 @@ export class CloudinaryService {
 
   public async replaceFile(
     publicId: string,
-    file: MemoryStorageFile,
+    file: Express.Multer.File,
     folder?: string,
   ): Promise<UploadApiErrorResponse | UploadApiResponse> {
     try {
@@ -50,7 +49,7 @@ export class CloudinaryService {
   }
 
   public async uploadFiles(
-    files: MemoryStorageFile[],
+    files: Express.Multer.File[],
     folder?: string,
   ): Promise<UploadApiErrorResponse | UploadApiResponse> {
     return new Promise((resolve, reject) => {

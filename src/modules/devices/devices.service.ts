@@ -1,6 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
 
-import { MemoryStorageFile } from '@blazity/nest-file-fastify';
 import { User } from '@prisma/client';
 import * as uuid from 'uuid';
 
@@ -163,7 +162,7 @@ export class DevicesService {
   }
 
   public async uploadImage(
-    file: MemoryStorageFile,
+    file: Express.Multer.File,
     id: string,
     projectId: string,
     user: User,
