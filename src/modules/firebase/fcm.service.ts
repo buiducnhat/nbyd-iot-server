@@ -17,6 +17,20 @@ export class FcmService {
   constructor(private readonly prisma: PrismaService) {}
 
   async create(input: CreateFcmTokenDto, user: User) {
+    // Check exists
+    const fcmToken = await this.prisma.fcmToken.findUnique({
+      where: {
+        token_userId: {
+          token: input.token,
+          userId: user.id,
+        },
+      },
+    });
+
+    if (fcmToken) {
+      return fcmToken;
+    }
+
     return this.prisma.fcmToken.create({
       data: {
         ...input,

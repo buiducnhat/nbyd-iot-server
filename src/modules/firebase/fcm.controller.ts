@@ -28,13 +28,13 @@ import { FcmService } from './fcm.service';
 export class FcmTokensController {
   constructor(private readonly fcmService: FcmService) {}
 
-  @Post()
+  @Post('/tokens')
   @ApiResponse(FcmTokenDto)
   create(@CurrentUser() user: User, @Body() body: CreateFcmTokenDto) {
     return this.fcmService.create(body, user);
   }
 
-  @Delete()
+  @Delete('/tokens')
   @ApiResponse(FcmTokenDto)
   remove(@Body() body: DeleteFcmTokenDto, @CurrentUser() user: User) {
     return this.fcmService.deleteToken(body, user);

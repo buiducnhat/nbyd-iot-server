@@ -6,11 +6,13 @@ import { TerminusModule } from '@nestjs/terminus';
 import appConfig from '@configs/app.config';
 import authConfig from '@configs/auth.config';
 import cloudinaryConfig from '@configs/cloudinary.config';
+import firebaseConfig from '@configs/firebase.config';
 import mqttConfig from '@configs/mqtt.config';
 
 import { AuthModule } from '@modules/auth/auth.module';
 import { CloudinaryModule } from '@modules/cloudinary/cloudinary.module';
 import { DevicesModule } from '@modules/devices/devices.module';
+import { FirebasesModule } from '@modules/firebase/firebase.module';
 import { ProjectsModule } from '@modules/projects/projects.module';
 import { UsersModule } from '@modules/users/users.module';
 
@@ -24,7 +26,13 @@ import { RealtimeComModule } from './modules/realtime-com/realtime-com.module';
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      load: [appConfig, authConfig, cloudinaryConfig, mqttConfig],
+      load: [
+        appConfig,
+        authConfig,
+        cloudinaryConfig,
+        mqttConfig,
+        firebaseConfig,
+      ],
       envFilePath: ['.env', '.env.development', '.env.production'],
     }),
     ScheduleModule.forRoot(),
@@ -37,6 +45,7 @@ import { RealtimeComModule } from './modules/realtime-com/realtime-com.module';
     DevicesModule,
     DatastreamsModule,
     RealtimeComModule,
+    FirebasesModule,
   ],
   controllers: [HealthsController],
   providers: [],
