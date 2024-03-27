@@ -1,0 +1,6 @@
+/.husky
+/.vscode
+/dist
+/node_modules
+/.git
+/logs
