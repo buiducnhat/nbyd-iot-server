@@ -3,8 +3,8 @@ generator client {
 }
 
 generator json {
-  provider     = "prisma-json-types-generator"
-  namespace    = "PrismaJson"
+  provider  = "prisma-json-types-generator"
+  namespace = "PrismaJson"
 }
 
 datasource db {
@@ -37,6 +37,8 @@ model User {
   sessions           UserSession[]
   externals          UserExternal[]
   projects           ProjectMember[]
+  fcmTokens          FcmToken[]
+  notifications      Notification[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -205,6 +207,40 @@ model Datastream {
   enabled        Boolean              @default(true)
   enabledHistory Boolean              @default(false)
   lastValue      String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum EAppType {
+  NBYD_WEBAPP
+  NBYD_MOBILEAPP
+}
+
+model FcmToken {
+  token   String
+  userId  Int
+  user    User     @relation(fields: [userId], references: [id])
+  appType EAppType
+
+  createdAt DateTime @default(now())
+
+  @@id([token, userId])
+}
+
+enum ENotificationType {
+  GENERAL
+}
+
+model Notification {
+  id     String            @id @default(uuid())
+  title  String
+  body   String
+  data   Json?
+  userId Int
+  user   User              @relation(fields: [userId], references: [id])
+  type   ENotificationType @default(GENERAL)
+  isRead Boolean           @default(false)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
