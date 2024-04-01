@@ -182,7 +182,6 @@ enum EDatastreamMode {
 }
 
 enum EDatastreamDataType {
-  BOOLEAN
   INTEGER
   FLOAT
   STRING
@@ -194,8 +193,8 @@ model Datastream {
   deviceId       String
   device         Device               @relation(fields: [deviceId], references: [id])
   name           String               @db.VarChar(50)
-  iconId         Int                  @default(0)
-  color          String               @default("#ffffff") @db.VarChar(7)
+  iconId         Int?
+  color          String?              @db.VarChar(20)
   type           EDatastreamType
   pin            String?              @db.VarChar(10)
   mode           EDatastreamMode?
@@ -204,12 +203,13 @@ model Datastream {
   maxValue       Float?
   defaultValue   String?
   unit           String?              @db.VarChar(50)
-  enabled        Boolean              @default(true)
   enabledHistory Boolean              @default(false)
   lastValue      String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@index([deviceId])
 }
 
 enum EAppType {
@@ -234,14 +234,14 @@ enum ENotificationType {
 
 model Notification {
   id     String            @id @default(uuid())
-  title  String
-  body   String
+  type   ENotificationType @default(GENERAL)
   data   Json?
   userId Int
   user   User              @relation(fields: [userId], references: [id])
-  type   ENotificationType @default(GENERAL)
   isRead Boolean           @default(false)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@index([userId, type, isRead])
 }

@@ -39,11 +39,11 @@ export class RealtimeComService {
     }
 
     if (!device.metaData) {
-      device.metaData = { ...data.metaData };
+      device.metaData = { ...data?.metaData };
     } else {
       device.metaData = {
         ...device.metaData,
-        ...data.metaData,
+        ...data?.metaData,
       };
     }
 

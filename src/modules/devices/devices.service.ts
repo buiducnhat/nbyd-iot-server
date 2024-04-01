@@ -65,15 +65,11 @@ export class DevicesService {
         datastreams: {
           select: {
             id: true,
-            enabled: true,
             type: true,
             pin: true,
             mode: true,
             dataType: true,
             lastValue: true,
-          },
-          where: {
-            enabled: true,
           },
         },
       },
