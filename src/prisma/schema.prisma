@@ -205,6 +205,7 @@ model Datastream {
   unit           String?              @db.VarChar(50)
   enabledHistory Boolean              @default(false)
   lastValue      String?
+  histories      DatastreamHistory[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -244,4 +245,14 @@ model Notification {
   updatedAt DateTime @updatedAt
 
   @@index([userId, type, isRead])
+}
+
+model DatastreamHistory {
+  datastreamId String
+  datastream   Datastream @relation(fields: [datastreamId], references: [id])
+  value        String
+  createdAt    DateTime   @default(now())
+
+  @@unique([datastreamId, value, createdAt])
+  @@index(fields: [createdAt], map: "datastream_history_created_at_idx")
 }

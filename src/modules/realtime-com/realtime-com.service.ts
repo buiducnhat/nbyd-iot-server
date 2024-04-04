@@ -1,12 +1,10 @@
 import { Inject, Injectable, Logger, forwardRef } from '@nestjs/common';
-import { SchedulerRegistry } from '@nestjs/schedule';
+import { Cron, CronExpression, SchedulerRegistry } from '@nestjs/schedule';
 
 import { EDeviceStatus } from '@prisma/client';
+import { PrismaClientUnknownRequestError } from '@prisma/client/runtime/library';
 
 import { TIME_1_MINUTE } from '@shared/constants/time.constant';
-import { FIRESTORE_PROVIDER_TOKEN } from '@shared/constants/token.constant';
-
-import { TFirestore } from '@modules/firebase/firestore.provider';
 
 import { PrismaService } from '@src/prisma/prisma.service';
 
@@ -22,8 +20,6 @@ export class RealtimeComService {
     @Inject(forwardRef(() => RealtimeComGateway))
     private readonly realtimeComGateway: RealtimeComGateway,
     private readonly schedulerRegistry: SchedulerRegistry,
-    @Inject(FIRESTORE_PROVIDER_TOKEN)
-    private readonly firestore: TFirestore,
   ) {}
 
   private async updateDeviceStatus(
@@ -84,41 +80,67 @@ export class RealtimeComService {
     datastreamId: string,
     value: string,
   ) {
-    // Update the last value of the datastream to database
-    const datastream = await this.prisma.datastream.update({
-      select: {
-        device: {
-          select: {
-            projectId: true,
+    try {
+      const dsHis = await this.prisma.datastreamHistory.create({
+        data: {
+          value,
+          datastream: {
+            connect: {
+              id: datastreamId,
+              device: {
+                id: deviceId,
+              },
+            },
           },
         },
-        enabledHistory: true,
-      },
-      data: {
-        lastValue: value,
-      },
-      where: {
-        id: datastreamId,
-        device: {
-          id: deviceId,
+        select: {
+          datastream: {
+            select: {
+              id: true,
+              enabledHistory: true,
+              device: {
+                select: {
+                  projectId: true,
+                },
+              },
+            },
+          },
         },
+      });
+      // Send the datastream value to the connected ws clients
+      this.realtimeComGateway.emitDeviceDataUpdate(
+        dsHis.datastream.device.projectId,
+        datastreamId,
+        value,
+      );
+    } catch (error) {
+      if (error instanceof PrismaClientUnknownRequestError) {
+        throw error;
+      }
+    }
+  }
+
+  // DELETE old data, but keep the latest 1 record (by createdAt field)
+  @Cron(CronExpression.EVERY_HOUR)
+  async deleteOldDeviceDatastreamHistory() {
+    let dhs = await this.prisma.datastreamHistory.groupBy({
+      by: ['datastreamId'],
+      _max: {
+        createdAt: true,
       },
     });
 
-    // Send the datastream value to the connected ws clients
-    this.realtimeComGateway.emitDeviceDataUpdate(
-      datastream.device.projectId,
-      datastreamId,
-      value,
-    );
+    dhs = dhs.filter((dh) => dh._max.createdAt);
 
-    if (datastream.enabledHistory) {
-      const res = await this.firestore.datastreamHistory.add({
-        datastreamId,
-        value,
-        timestamp: new Date(),
-      });
-      console.log(res);
-    }
+    await this.prisma.datastreamHistory.deleteMany({
+      where: {
+        OR: dhs.map((ds) => ({
+          datastreamId: ds.datastreamId,
+          createdAt: {
+            lt: ds._max.createdAt,
+          },
+        })),
+      },
+    });
   }
 }

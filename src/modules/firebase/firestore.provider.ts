@@ -4,14 +4,14 @@ import * as firebase from 'firebase-admin';
 
 import { FIRESTORE_PROVIDER_TOKEN } from '@shared/constants/token.constant';
 
-type TDatastreamHistory = {
+type TTest = {
   datastreamId: string;
   value: string;
   timestamp: Date;
 };
 
 export type TFirestore = {
-  datastreamHistory: firebase.firestore.CollectionReference<TDatastreamHistory>;
+  test: firebase.firestore.CollectionReference<TTest>;
 };
 
 export const FirestoreProvider: Provider = {
@@ -30,7 +30,7 @@ export const FirestoreProvider: Provider = {
         .withConverter(converter<T>());
 
     const firestore: TFirestore = {
-      datastreamHistory: dataPoint<TDatastreamHistory>('datastream-histories'),
+      test: dataPoint<TTest>('test'),
     };
 
     return firestore;
