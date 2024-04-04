@@ -1,22 +1,19 @@
-import { ConfigService } from '@nestjs/config';
+import { Provider } from '@nestjs/common';
 
-import * as firebaseAdmin from 'firebase-admin';
-
-import { TFirebaseConfig } from '@configs/firebase.config';
+import * as firebase from 'firebase-admin';
 
 import { FIREBASE_PROVIDER_TOKEN } from '@shared/constants/token.constant';
 
-import { TConfigs } from '@src/configs';
+import * as serviceAccount from '../../../firebase-adminsdk.json';
 
-export const FirebaseProvider = {
+export const FirebaseProvider: Provider = {
   provide: FIREBASE_PROVIDER_TOKEN,
-  useFactory: async (configService: ConfigService<TConfigs>) =>
-    firebaseAdmin.initializeApp({
-      credential: firebaseAdmin.credential.cert({
-        projectId: configService.get<TFirebaseConfig>('firebase').projectId,
-        privateKey: configService.get<TFirebaseConfig>('firebase').privateKey,
-        clientEmail: configService.get<TFirebaseConfig>('firebase').clientEmail,
+  useFactory: async () =>
+    firebase.initializeApp({
+      credential: firebase.credential.cert({
+        projectId: serviceAccount.project_id,
+        clientEmail: serviceAccount.client_email,
+        privateKey: serviceAccount.private_key,
       }),
     }),
-  inject: [ConfigService],
 };

@@ -4,6 +4,9 @@ import { SchedulerRegistry } from '@nestjs/schedule';
 import { EDeviceStatus } from '@prisma/client';
 
 import { TIME_1_MINUTE } from '@shared/constants/time.constant';
+import { FIRESTORE_PROVIDER_TOKEN } from '@shared/constants/token.constant';
+
+import { TFirestore } from '@modules/firebase/firestore.provider';
 
 import { PrismaService } from '@src/prisma/prisma.service';
 
@@ -19,6 +22,8 @@ export class RealtimeComService {
     @Inject(forwardRef(() => RealtimeComGateway))
     private readonly realtimeComGateway: RealtimeComGateway,
     private readonly schedulerRegistry: SchedulerRegistry,
+    @Inject(FIRESTORE_PROVIDER_TOKEN)
+    private readonly firestore: TFirestore,
   ) {}
 
   private async updateDeviceStatus(
@@ -87,6 +92,7 @@ export class RealtimeComService {
             projectId: true,
           },
         },
+        enabledHistory: true,
       },
       data: {
         lastValue: value,
@@ -105,5 +111,14 @@ export class RealtimeComService {
       datastreamId,
       value,
     );
+
+    if (datastream.enabledHistory) {
+      const res = await this.firestore.datastreamHistory.add({
+        datastreamId,
+        value,
+        timestamp: new Date(),
+      });
+      console.log(res);
+    }
   }
 }

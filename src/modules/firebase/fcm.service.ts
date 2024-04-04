@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 
 import { User } from '@prisma/client';
-import * as firebaseAdmin from 'firebase-admin';
+import * as firebase from 'firebase-admin';
 import {
   Notification,
   NotificationMessagePayload,
@@ -68,7 +68,7 @@ export class FcmService {
     notification: Notification,
     data?: { [key: string]: string },
   ) {
-    await firebaseAdmin.messaging().sendEachForMulticast({
+    await firebase.messaging().sendEachForMulticast({
       tokens,
       notification,
       data,
@@ -80,7 +80,7 @@ export class FcmService {
     notification: NotificationMessagePayload,
     data?: { [key: string]: string },
   ) {
-    await firebaseAdmin.messaging().sendToTopic(topic, {
+    await firebase.messaging().sendToTopic(topic, {
       notification,
       data,
     });

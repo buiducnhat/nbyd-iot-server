@@ -6,7 +6,6 @@ import { TerminusModule } from '@nestjs/terminus';
 import appConfig from '@configs/app.config';
 import authConfig from '@configs/auth.config';
 import cloudinaryConfig from '@configs/cloudinary.config';
-import firebaseConfig from '@configs/firebase.config';
 import mqttConfig from '@configs/mqtt.config';
 
 import { AuthModule } from '@modules/auth/auth.module';
@@ -26,13 +25,7 @@ import { RealtimeComModule } from './modules/realtime-com/realtime-com.module';
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      load: [
-        appConfig,
-        authConfig,
-        cloudinaryConfig,
-        mqttConfig,
-        firebaseConfig,
-      ],
+      load: [appConfig, authConfig, cloudinaryConfig, mqttConfig],
       envFilePath: ['.env', '.env.development', '.env.production'],
     }),
     ScheduleModule.forRoot(),
