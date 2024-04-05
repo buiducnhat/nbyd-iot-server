@@ -36,10 +36,10 @@ export class RealtimeComController {
   ) {
     const deviceId = ctx.getTopic().split('/')[3];
 
-    return this.realtimeComService.handleDeviceData(
+    return this.realtimeComService.updateDeviceData({
       deviceId,
-      data.datastreamId,
-      data.value,
-    );
+      datastreamId: data.datastreamId,
+      value: data.value,
+    });
   }
 }

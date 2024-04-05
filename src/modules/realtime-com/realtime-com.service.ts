@@ -1,7 +1,7 @@
 import { Inject, Injectable, Logger, forwardRef } from '@nestjs/common';
 import { Cron, CronExpression, SchedulerRegistry } from '@nestjs/schedule';
 
-import { EDeviceStatus } from '@prisma/client';
+import { EDeviceStatus, User } from '@prisma/client';
 import { PrismaClientUnknownRequestError } from '@prisma/client/runtime/library';
 
 import { TIME_1_MINUTE } from '@shared/constants/time.constant';
@@ -75,11 +75,19 @@ export class RealtimeComService {
     this.schedulerRegistry.addTimeout(`/devices/${deviceId}/ping`, timeout);
   }
 
-  async handleDeviceData(
-    deviceId: string,
-    datastreamId: string,
-    value: string,
-  ) {
+  async updateDeviceData({
+    deviceId,
+    datastreamId,
+    value,
+    needEmit,
+    user,
+  }: {
+    deviceId?: string;
+    datastreamId: string;
+    value: string;
+    needEmit?: boolean;
+    user?: User;
+  }) {
     try {
       const dsHis = await this.prisma.datastreamHistory.create({
         data: {
@@ -89,6 +97,15 @@ export class RealtimeComService {
               id: datastreamId,
               device: {
                 id: deviceId,
+                project: user
+                  ? {
+                      members: {
+                        some: {
+                          userId: user.id,
+                        },
+                      },
+                    }
+                  : undefined,
               },
             },
           },
@@ -107,12 +124,17 @@ export class RealtimeComService {
           },
         },
       });
-      // Send the datastream value to the connected ws clients
-      this.realtimeComGateway.emitDeviceDataUpdate(
-        dsHis.datastream.device.projectId,
-        datastreamId,
-        value,
-      );
+
+      if (needEmit) {
+        // Send the datastream value to the connected ws clients
+        this.realtimeComGateway.emitDeviceDataUpdate(
+          dsHis.datastream.device.projectId,
+          datastreamId,
+          value,
+        );
+      }
+
+      return dsHis;
     } catch (error) {
       if (error instanceof PrismaClientUnknownRequestError) {
         throw error;

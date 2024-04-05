@@ -24,7 +24,6 @@ import { RealtimeComService } from './realtime-com.service';
 export class RealtimeComGateway {
   @WebSocketServer()
   private readonly server: Server;
-
   private readonly logger = new Logger(RealtimeComGateway.name);
 
   constructor(
@@ -73,29 +72,15 @@ export class RealtimeComGateway {
     @MessageBody() input: DeviceCommandWsDto,
     @CurrentUser() user: User,
   ) {
-    // Update the last value of the datastream
-    const datastream = await this.prisma.datastream.update({
-      data: {
-        lastValue: input.value,
-      },
-      where: {
-        id: input.datastreamId,
-        device: {
-          project: {
-            members: {
-              some: { userId: user.id },
-            },
-          },
-        },
-      },
-    });
-    if (!datastream) {
-      return;
-    }
-
     // Publish the command to the MQTT broker
-    this.mqttClient.emit(`/nbyd/devices/${datastream.deviceId}/command`, {
+    this.mqttClient.emit(`/nbyd/devices/${input.deviceId}/command`, {
       ...input,
+    });
+
+    // Update datastream value
+    this.realtimeComService.updateDeviceData({
+      ...input,
+      user,
     });
   }
 

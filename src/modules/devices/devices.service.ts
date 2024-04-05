@@ -69,7 +69,15 @@ export class DevicesService {
             pin: true,
             mode: true,
             dataType: true,
-            lastValue: true,
+            histories: {
+              select: {
+                value: true,
+              },
+              take: 1,
+              orderBy: {
+                createdAt: 'desc',
+              },
+            },
           },
         },
       },

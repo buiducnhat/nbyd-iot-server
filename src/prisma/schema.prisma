@@ -204,7 +204,6 @@ model Datastream {
   defaultValue   String?
   unit           String?              @db.VarChar(50)
   enabledHistory Boolean              @default(false)
-  lastValue      String?
   histories      DatastreamHistory[]
 
   createdAt DateTime @default(now())
