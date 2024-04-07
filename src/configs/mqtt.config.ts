@@ -23,7 +23,7 @@ class MqttConfigValidator {
   MQTT_PASSWORD: string;
 }
 
-export default registerAs<any>('mqtt', () => {
+export default registerAs<TMqttConfig>('mqtt', () => {
   validateConfig(process.env, MqttConfigValidator);
 
   return {

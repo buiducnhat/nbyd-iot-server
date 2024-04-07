@@ -7,8 +7,6 @@ import {
   EDeviceStatus,
 } from '@prisma/client';
 
-import { DatastreamBasicDto } from '@modules/datastreams/dto/datastream.dto';
-
 export class DeviceBasicDto implements Partial<Device> {
   @ApiProperty({ example: 'd1e2d3d4-5f6g-7h8i-9j0k-1l2m3n4o5p6' })
   id: string;
@@ -45,6 +43,4 @@ export class DeviceBasicDto implements Partial<Device> {
 
   @ApiPropertyOptional()
   lastOnline?: Date;
-
-  datastreams: DatastreamBasicDto[];
 }

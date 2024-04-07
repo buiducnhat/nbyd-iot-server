@@ -28,7 +28,7 @@ import { DeleteManyDatastreamsDto } from './dto/delete-many-datastreams.dto';
 @JwtAuth()
 @UseInterceptors(TransformResponseInterceptor)
 export class DatastreamsController {
-  constructor(private readonly deviceService: DatastreamsService) {}
+  constructor(private readonly datastreamService: DatastreamsService) {}
 
   @Post()
   @ApiResponse(DatastreamBasicDto)
@@ -38,7 +38,7 @@ export class DatastreamsController {
     @Body() input: CreateDatastreamDto,
     @CurrentUser() user: User,
   ) {
-    return this.deviceService.create(input, deviceId, projectId, user);
+    return this.datastreamService.create(input, deviceId, projectId, user);
   }
 
   @Patch(':id')
@@ -50,7 +50,7 @@ export class DatastreamsController {
     @Body() input: CreateDatastreamDto,
     @CurrentUser() user: User,
   ) {
-    return this.deviceService.update(input, id, deviceId, projectId, user);
+    return this.datastreamService.update(input, id, deviceId, projectId, user);
   }
 
   @Delete(':id')
@@ -61,7 +61,7 @@ export class DatastreamsController {
     @Param('id') id: string,
     @CurrentUser() user: User,
   ) {
-    return this.deviceService.delete(id, deviceId, projectId, user);
+    return this.datastreamService.delete(id, deviceId, projectId, user);
   }
 
   @Delete()
@@ -72,6 +72,6 @@ export class DatastreamsController {
     @Body() input: DeleteManyDatastreamsDto,
     @CurrentUser() user: User,
   ) {
-    return this.deviceService.deleteMany(input, deviceId, projectId, user);
+    return this.datastreamService.deleteMany(input, deviceId, projectId, user);
   }
 }

@@ -17,6 +17,10 @@ import { User } from '@prisma/client';
 
 import { ApiArrayResponse, ApiResponse } from '@shared/response';
 
+import { DatastreamsService } from '@modules/datastreams/datastreams.service';
+import { DatastreamDetailDto } from '@modules/datastreams/dto/datastream.dto';
+import { GetDatastreamByProjectDto } from '@modules/datastreams/dto/get-datastream-by-project.dto';
+
 import { CurrentUser } from '@src/decorators/current-user.decorator';
 import { JwtAuth } from '@src/decorators/jwt-auth.decorator';
 import { TransformResponseInterceptor } from '@src/interceptors/transform-response.interceptor';
@@ -34,7 +38,10 @@ import { ProjectsService } from './projects.service';
 @JwtAuth()
 @UseInterceptors(TransformResponseInterceptor)
 export class ProjectsController {
-  constructor(private readonly projectsService: ProjectsService) {}
+  constructor(
+    private readonly projectsService: ProjectsService,
+    private readonly datastreamsService: DatastreamsService,
+  ) {}
 
   @Post()
   @ApiResponse(ProjectBasicDto)
@@ -101,5 +108,15 @@ export class ProjectsController {
     @UploadedFile() file: Express.Multer.File,
   ) {
     return this.projectsService.uploadImage(id, file, user);
+  }
+
+  @Get('/:id/datastreams')
+  @ApiArrayResponse(DatastreamDetailDto)
+  async getListDatastream(
+    @Param('id') id: string,
+    @Query() query: GetDatastreamByProjectDto,
+    @CurrentUser() user: User,
+  ) {
+    return this.datastreamsService.getListByProject(id, query, user);
   }
 }

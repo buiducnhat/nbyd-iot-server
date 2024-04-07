@@ -6,6 +6,7 @@ import { TConfigs } from '@configs/index';
 import { TMqttConfig } from '@configs/mqtt.config';
 
 import { AuthModule } from '@modules/auth/auth.module';
+import { DatastreamsModule } from '@modules/datastreams/datastreams.module';
 import { FirebasesModule } from '@modules/firebase/firebase.module';
 
 import { PrismaModule } from '@src/prisma/prisma.module';
@@ -40,6 +41,7 @@ import { RealtimeComService } from './realtime-com.service';
     PrismaModule,
     AuthModule,
     FirebasesModule,
+    DatastreamsModule,
   ],
   controllers: [RealtimeComController],
   providers: [RealtimeComGateway, RealtimeComService],

@@ -1,12 +1,15 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ScheduleModule } from '@nestjs/schedule';
 import { TerminusModule } from '@nestjs/terminus';
+
+import { RedisModule } from '@nestjs-modules/ioredis';
 
 import appConfig from '@configs/app.config';
 import authConfig from '@configs/auth.config';
 import cloudinaryConfig from '@configs/cloudinary.config';
 import mqttConfig from '@configs/mqtt.config';
+import redisConfig, { TRedisConfig } from '@configs/redis.config';
 
 import { AuthModule } from '@modules/auth/auth.module';
 import { CloudinaryModule } from '@modules/cloudinary/cloudinary.module';
@@ -18,6 +21,7 @@ import { UsersModule } from '@modules/users/users.module';
 import { HealthsController } from '@src/healths/health.controller';
 import { PrismaModule } from '@src/prisma/prisma.module';
 
+import { TConfigs } from './configs';
 import { DatastreamsModule } from './modules/datastreams/datastreams.module';
 import { RealtimeComModule } from './modules/realtime-com/realtime-com.module';
 
@@ -25,8 +29,15 @@ import { RealtimeComModule } from './modules/realtime-com/realtime-com.module';
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      load: [appConfig, authConfig, cloudinaryConfig, mqttConfig],
+      load: [appConfig, authConfig, cloudinaryConfig, mqttConfig, redisConfig],
       envFilePath: ['.env', '.env.development', '.env.production'],
+    }),
+    RedisModule.forRootAsync({
+      useFactory: (configService: ConfigService<TConfigs>) => ({
+        type: 'single',
+        url: configService.get<TRedisConfig>('redis').url,
+      }),
+      inject: [ConfigService],
     }),
     ScheduleModule.forRoot(),
     TerminusModule,

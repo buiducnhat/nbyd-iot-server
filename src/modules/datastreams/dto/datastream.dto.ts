@@ -49,3 +49,16 @@ export class DatastreamBasicDto {
   @ApiPropertyOptional()
   description?: string;
 }
+
+export class DatastreamHistoryDto {
+  @ApiProperty()
+  value: string;
+
+  @ApiProperty()
+  createdAt: Date;
+}
+
+export class DatastreamDetailDto extends DatastreamBasicDto {
+  @ApiProperty()
+  histories: DatastreamHistoryDto[];
+}

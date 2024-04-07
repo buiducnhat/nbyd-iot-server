@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 
 import { ProjectsModule } from '@modules/projects/projects.module';
 
@@ -8,8 +8,9 @@ import { DatastreamsController } from './datastreams.controller';
 import { DatastreamsService } from './datastreams.service';
 
 @Module({
-  imports: [PrismaModule, ProjectsModule],
+  imports: [PrismaModule, forwardRef(() => ProjectsModule)],
   controllers: [DatastreamsController],
   providers: [DatastreamsService],
+  exports: [DatastreamsService],
 })
 export class DatastreamsModule {}

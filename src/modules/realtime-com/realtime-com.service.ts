@@ -1,14 +1,17 @@
 import { Inject, Injectable, Logger, forwardRef } from '@nestjs/common';
-import { Cron, CronExpression, SchedulerRegistry } from '@nestjs/schedule';
+import { ClientMqtt } from '@nestjs/microservices';
+import { SchedulerRegistry } from '@nestjs/schedule';
 
-import { EDeviceStatus, User } from '@prisma/client';
-import { PrismaClientUnknownRequestError } from '@prisma/client/runtime/library';
+import { EDeviceStatus } from '@prisma/client';
 
 import { TIME_1_MINUTE } from '@shared/constants/time.constant';
 
+import { DatastreamsService } from '@modules/datastreams/datastreams.service';
+import { CreateHistoryDto } from '@modules/datastreams/dto/create-historty.dto';
+
 import { PrismaService } from '@src/prisma/prisma.service';
 
-import { DevicePingMqttDto } from './dto/device-ping-mqtt.dto';
+import { DevicePingMqttDto as DeviceStatusMqttDto } from './dto/device-status-mqtt.dto';
 import { RealtimeComGateway } from './realtime-com.gateway';
 
 @Injectable()
@@ -20,12 +23,15 @@ export class RealtimeComService {
     @Inject(forwardRef(() => RealtimeComGateway))
     private readonly realtimeComGateway: RealtimeComGateway,
     private readonly schedulerRegistry: SchedulerRegistry,
+    @Inject('MQTT_CLIENT') private readonly mqtt: ClientMqtt,
+    private readonly datastreamsService: DatastreamsService,
   ) {}
 
   private async updateDeviceStatus(
+    projectId: string,
     deviceId: string,
     status: EDeviceStatus,
-    data?: DevicePingMqttDto,
+    data?: DeviceStatusMqttDto,
   ) {
     const device = await this.prisma.device.findUnique({
       select: {
@@ -33,6 +39,7 @@ export class RealtimeComService {
       },
       where: {
         id: deviceId,
+        projectId,
       },
     });
     if (!device) {
@@ -60,109 +67,53 @@ export class RealtimeComService {
     });
   }
 
-  async handleDevicePing(deviceId: string, data: DevicePingMqttDto) {
+  async handleDeviceStatus(
+    projectId: string,
+    deviceId: string,
+    data: DeviceStatusMqttDto,
+  ) {
     // Update the device status to online
-    await this.updateDeviceStatus(deviceId, EDeviceStatus.ONLINE, data);
+    await this.updateDeviceStatus(
+      projectId,
+      deviceId,
+      EDeviceStatus.ONLINE,
+      data,
+    );
 
     try {
       // Set the device status to offline after time
-      this.schedulerRegistry.deleteTimeout(`/devices/${deviceId}/ping`);
+      this.schedulerRegistry.deleteTimeout(
+        `/projects/${projectId}/devices/${deviceId}/status`,
+      );
     } catch (error) {}
 
     const timeout = setTimeout(async () => {
-      await this.updateDeviceStatus(deviceId, EDeviceStatus.OFFLINE);
+      await this.updateDeviceStatus(projectId, deviceId, EDeviceStatus.OFFLINE);
     }, TIME_1_MINUTE);
-    this.schedulerRegistry.addTimeout(`/devices/${deviceId}/ping`, timeout);
+    this.schedulerRegistry.addTimeout(
+      `/projects/${projectId}/devices/${deviceId}/status`,
+      timeout,
+    );
   }
 
-  async updateDeviceData({
-    deviceId,
-    datastreamId,
-    value,
-    needEmit,
-    user,
-  }: {
-    deviceId?: string;
-    datastreamId: string;
-    value: string;
-    needEmit?: boolean;
-    user?: User;
-  }) {
-    try {
-      const dsHis = await this.prisma.datastreamHistory.create({
-        data: {
-          value,
-          datastream: {
-            connect: {
-              id: datastreamId,
-              device: {
-                id: deviceId,
-                project: user
-                  ? {
-                      members: {
-                        some: {
-                          userId: user.id,
-                        },
-                      },
-                    }
-                  : undefined,
-              },
-            },
-          },
+  async handleDeviceCommandData(input: CreateHistoryDto, from: 'MQTT' | 'WS') {
+    if (from === 'MQTT') {
+      this.realtimeComGateway.emitDeviceDataUpdate(
+        input.projectId,
+        input.deviceId,
+        input.datastreamId,
+        input.value,
+      );
+    } else {
+      // Publish the command to the MQTT broker
+      this.mqtt.emit(
+        `/nbyd/projects/${input.projectId}/devices/${input.deviceId}/command`,
+        {
+          ...input,
         },
-        select: {
-          datastream: {
-            select: {
-              id: true,
-              enabledHistory: true,
-              device: {
-                select: {
-                  projectId: true,
-                },
-              },
-            },
-          },
-        },
-      });
-
-      if (needEmit) {
-        // Send the datastream value to the connected ws clients
-        this.realtimeComGateway.emitDeviceDataUpdate(
-          dsHis.datastream.device.projectId,
-          datastreamId,
-          value,
-        );
-      }
-
-      return dsHis;
-    } catch (error) {
-      if (error instanceof PrismaClientUnknownRequestError) {
-        throw error;
-      }
+      );
     }
-  }
 
-  // DELETE old data, but keep the latest 1 record (by createdAt field)
-  @Cron(CronExpression.EVERY_HOUR)
-  async deleteOldDeviceDatastreamHistory() {
-    let dhs = await this.prisma.datastreamHistory.groupBy({
-      by: ['datastreamId'],
-      _max: {
-        createdAt: true,
-      },
-    });
-
-    dhs = dhs.filter((dh) => dh._max.createdAt);
-
-    await this.prisma.datastreamHistory.deleteMany({
-      where: {
-        OR: dhs.map((ds) => ({
-          datastreamId: ds.datastreamId,
-          createdAt: {
-            lt: ds._max.createdAt,
-          },
-        })),
-      },
-    });
+    return this.datastreamsService.createHistory(input);
   }
 }

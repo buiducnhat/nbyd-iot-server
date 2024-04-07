@@ -108,20 +108,7 @@ export class ProjectsService {
             },
           },
         },
-        devices: {
-          include: {
-            datastreams: {
-              include: {
-                histories: {
-                  orderBy: {
-                    createdAt: 'desc',
-                  },
-                  take: 1,
-                },
-              },
-            },
-          },
-        },
+        devices: true,
       },
       where: {
         id,

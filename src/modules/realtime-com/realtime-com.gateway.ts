@@ -1,5 +1,4 @@
 import { Inject, Logger, UseGuards, forwardRef } from '@nestjs/common';
-import { ClientMqtt } from '@nestjs/microservices';
 import {
   ConnectedSocket,
   MessageBody,
@@ -28,7 +27,6 @@ export class RealtimeComGateway {
 
   constructor(
     private readonly prisma: PrismaService,
-    @Inject('MQTT_CLIENT') private readonly mqttClient: ClientMqtt,
     @Inject(forwardRef(() => RealtimeComService))
     private readonly realtimeComService: RealtimeComService,
   ) {}
@@ -67,29 +65,26 @@ export class RealtimeComGateway {
 
   @SubscribeMessage('/devices/command')
   @UseGuards(JwtAuthWsGuard)
-  async handleCommand(
-    @ConnectedSocket() socket: Socket,
-    @MessageBody() input: DeviceCommandWsDto,
-    @CurrentUser() user: User,
-  ) {
-    // Publish the command to the MQTT broker
-    this.mqttClient.emit(`/nbyd/devices/${input.deviceId}/command`, {
-      ...input,
-    });
-
-    // Update datastream value
-    this.realtimeComService.updateDeviceData({
-      ...input,
-      user,
-    });
+  async handleCommand(@MessageBody() input: DeviceCommandWsDto) {
+    return this.realtimeComService.handleDeviceCommandData(
+      {
+        projectId: input.projectId,
+        deviceId: input.deviceId,
+        datastreamId: input.datastreamId,
+        value: input.value,
+      },
+      'WS',
+    );
   }
 
   async emitDeviceDataUpdate(
     projectId: string,
+    deviceId: string,
     datastreamId: string,
     value: string,
   ) {
     this.server.to(`/projects/${projectId}`).emit('/devices/data', {
+      deviceId,
       datastreamId,
       value,
     });
