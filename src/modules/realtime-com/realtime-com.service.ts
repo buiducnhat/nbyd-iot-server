@@ -107,9 +107,10 @@ export class RealtimeComService {
     } else {
       // Publish the command to the MQTT broker
       this.mqtt.emit(
-        `/nbyd/projects/${input.projectId}/devices/${input.deviceId}/command`,
+        `/projects/${input.projectId}/devices/${input.deviceId}/command`,
         {
-          ...input,
+          datastreamId: input.datastreamId,
+          value: input.value,
         },
       );
     }

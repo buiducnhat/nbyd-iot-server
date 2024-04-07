@@ -7,6 +7,7 @@ import { CNotFoundException } from '@shared/custom-http-exception';
 import { prismaExclude } from '@shared/helpers/prisma.helper';
 
 import { CloudinaryService } from '@modules/cloudinary/cloudinary.service';
+import { DatastreamsService } from '@modules/datastreams/datastreams.service';
 import { ProjectsService } from '@modules/projects/projects.service';
 
 import { PrismaService } from '@src/prisma/prisma.service';
@@ -22,6 +23,7 @@ export class DevicesService {
     private readonly prisma: PrismaService,
     @Inject(ProjectsService) private readonly projectsService: ProjectsService,
     private readonly cloudinary: CloudinaryService,
+    private readonly datastreamsService: DatastreamsService,
   ) {}
 
   async create(input: CreateDeviceDto, projectId: string, user: User) {
@@ -56,30 +58,12 @@ export class DevicesService {
   }
 
   async getByAuthToken(authToken: string, projectId: string) {
-    return this.prisma.device.findUnique({
+    const device = await this.prisma.device.findUnique({
       select: {
         id: true,
         name: true,
         hardware: true,
         connection: true,
-        datastreams: {
-          select: {
-            id: true,
-            type: true,
-            pin: true,
-            mode: true,
-            dataType: true,
-            histories: {
-              select: {
-                value: true,
-              },
-              take: 1,
-              orderBy: {
-                createdAt: 'desc',
-              },
-            },
-          },
-        },
       },
       where: {
         authToken,
@@ -90,6 +74,28 @@ export class DevicesService {
         ],
       },
     });
+
+    if (!device) {
+      throw new CNotFoundException('Device not found');
+    }
+
+    const datastreams =
+      await this.datastreamsService.getListByProject(projectId);
+
+    return {
+      ...device,
+      datastreams: datastreams
+        .filter((x) => x.deviceId === device.id)
+        .map((x) => {
+          const lastValue = x.histories[0]?.value ?? null;
+          delete x.histories;
+          delete x.deviceId;
+          return {
+            ...x,
+            lastValue,
+          };
+        }),
+    };
   }
 
   async getList(input: GetListDeviceDto, projectId: string, user: User) {

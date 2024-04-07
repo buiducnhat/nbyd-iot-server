@@ -17,14 +17,14 @@ import { RealtimeComService } from './realtime-com.service';
 export class RealtimeComController {
   constructor(private readonly realtimeComService: RealtimeComService) {}
 
-  @EventPattern('/nbyd/projects/+/devices/+/status', Transport.MQTT)
+  @EventPattern('/projects/+/devices/+/status', Transport.MQTT)
   @IsPublic()
   async handleDevicePing(
     @Ctx() ctx: MqttContext,
     @Payload() data: DevicePingMqttDto,
   ) {
-    const projectId = ctx.getTopic().split('/')[3];
-    const deviceId = ctx.getTopic().split('/')[5];
+    const projectId = ctx.getTopic().split('/')[2];
+    const deviceId = ctx.getTopic().split('/')[4];
 
     return this.realtimeComService.handleDeviceStatus(
       projectId,
@@ -33,14 +33,14 @@ export class RealtimeComController {
     );
   }
 
-  @EventPattern('/nbyd/projects/+/devices/+/data', Transport.MQTT)
+  @EventPattern('/projects/+/devices/+/data', Transport.MQTT)
   @IsPublic()
   async handleDeviceData(
     @Ctx() ctx: MqttContext,
     @Payload() data: DeviceDataMqttDto,
   ) {
-    const projectId = ctx.getTopic().split('/')[3];
-    const deviceId = ctx.getTopic().split('/')[5];
+    const projectId = ctx.getTopic().split('/')[2];
+    const deviceId = ctx.getTopic().split('/')[4];
 
     return this.realtimeComService.handleDeviceCommandData(
       {

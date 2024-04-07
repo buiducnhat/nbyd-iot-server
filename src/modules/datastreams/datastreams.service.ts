@@ -107,8 +107,8 @@ export class DatastreamsService {
 
   async getListByProject(
     projectId: string,
-    input: GetDatastreamsByProjectDto,
-    user: User,
+    input?: GetDatastreamsByProjectDto,
+    user?: User,
   ) {
     const cachedDHsString = await this.redis.get(
       `/projects/${projectId}/datastream-histories`,
@@ -137,10 +137,12 @@ export class DatastreamsService {
       },
       where: {
         device: {
-          project: {
-            id: projectId,
-            ...this.projectsService.inWhereFilter(user),
-          },
+          project: user
+            ? {
+                id: projectId,
+                ...this.projectsService.inWhereFilter(user),
+              }
+            : { id: projectId },
         },
       },
     });
