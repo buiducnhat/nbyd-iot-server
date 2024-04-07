@@ -126,8 +126,8 @@ export class DatastreamsService {
           : {
               where: {
                 createdAt: {
-                  gte: new Date(input.historyFrom || 0),
-                  lte: new Date(input.historyTo || new Date()),
+                  gte: new Date(input?.historyFrom || 0),
+                  lte: new Date(input?.historyTo || new Date()),
                 },
               },
               orderBy: {
@@ -206,51 +206,18 @@ export class DatastreamsService {
     return cachedDHs;
   }
 
-  // DELETE old data with disabled history datastream, keep the latest record
-  @Cron(CronExpression.EVERY_HOUR)
-  async deleteOldDHs() {
-    let dhs = await this.prisma.datastreamHistory.groupBy({
-      by: ['datastreamId'],
-      _max: {
-        createdAt: true,
-      },
-      where: {
-        datastream: {
-          enabledHistory: false,
-        },
-      },
-    });
-
-    dhs = dhs.filter((dh) => dh._max.createdAt);
-
-    if (!dhs.length) {
-      return;
-    }
-
-    await this.redis.del(
-      dhs.map((ds) => `/projects/*/datastream-histories/${ds.datastreamId}`),
-    );
-
-    await this.prisma.datastreamHistory.deleteMany({
-      where: {
-        datastream: {
-          enabledHistory: false,
-        },
-        OR: dhs.map((ds) => ({
-          datastreamId: ds.datastreamId,
-          createdAt: {
-            lt: ds._max.createdAt,
-          },
-        })),
-      },
-    });
-  }
-
-  @Cron(CronExpression.EVERY_MINUTE)
+  @Cron(CronExpression.EVERY_10_SECONDS)
   async syncCachedDHsToDb() {
     const keys = await this.redis.keys('/projects/*/datastream-histories');
 
     const dataToInsert: DatastreamHistory[] = [];
+
+    const disHisDatastreams = await this.prisma.datastream.findMany({
+      select: { id: true, enabledHistory: true },
+      where: {
+        enabledHistory: false,
+      },
+    });
 
     for (const key of keys) {
       const cachedDHsString = await this.redis.get(key);
@@ -264,11 +231,31 @@ export class DatastreamsService {
         continue;
       }
 
+      // Filter and process DatastreamHistory
+      const filteredHistory = disHisDatastreams.flatMap((datastream) => {
+        if (datastream.enabledHistory) {
+          // If enabled, return all corresponding DatastreamHistory
+          return cachedDHs.filter(
+            (history) => history.datastreamId === datastream.id,
+          );
+        } else {
+          // If disabled, find the latest DatastreamHistory and return only that
+          const latestHistory = cachedDHs
+            .filter((history) => history.datastreamId === datastream.id)
+            .reduce((latest, current) =>
+              current.createdAt > latest.createdAt ? current : latest,
+            );
+          return latestHistory ? [latestHistory] : []; // Return as array or empty array if no history found
+        }
+      });
+
+      await this.redis.set(key, JSON.stringify(filteredHistory));
+
       dataToInsert.push(
-        ...cachedDHs.map((dh) => ({
-          ...dh,
-          datastreamId: dh.datastreamId,
-          createdAt: dh.createdAt,
+        ...filteredHistory.map((h) => ({
+          ...h,
+          datastreamId: h.datastreamId,
+          createdAt: h.createdAt,
         })),
       );
     }
@@ -277,9 +264,12 @@ export class DatastreamsService {
       return;
     }
 
-    await this.prisma.datastreamHistory.createMany({
-      data: dataToInsert,
-      skipDuplicates: true,
-    });
+    await this.prisma.$transaction([
+      this.prisma.datastreamHistory.deleteMany(),
+      this.prisma.datastreamHistory.createMany({
+        data: dataToInsert,
+        skipDuplicates: true,
+      }),
+    ]);
   }
 }
