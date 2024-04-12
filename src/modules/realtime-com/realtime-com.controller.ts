@@ -17,34 +17,28 @@ import { RealtimeComService } from './realtime-com.service';
 export class RealtimeComController {
   constructor(private readonly realtimeComService: RealtimeComService) {}
 
-  @EventPattern('/projects/+/devices/+/status', Transport.MQTT)
+  @EventPattern('/devices/+/status', Transport.MQTT)
   @IsPublic()
   async handleDevicePing(
     @Ctx() ctx: MqttContext,
     @Payload() data: DevicePingMqttDto,
   ) {
-    const projectId = ctx.getTopic().split('/')[2];
     const deviceId = ctx.getTopic().split('/')[4];
 
-    return this.realtimeComService.handleDeviceStatus(
-      projectId,
-      deviceId,
-      data,
-    );
+    return this.realtimeComService.handleDeviceStatus(deviceId, data);
   }
 
-  @EventPattern('/projects/+/devices/+/data', Transport.MQTT)
+  @EventPattern('/devices/+/data', Transport.MQTT)
   @IsPublic()
   async handleDeviceData(
     @Ctx() ctx: MqttContext,
     @Payload() data: DeviceDataMqttDto,
   ) {
-    const projectId = ctx.getTopic().split('/')[2];
-    const deviceId = ctx.getTopic().split('/')[4];
+    const deviceId = ctx.getTopic().split('/')[2];
 
     return this.realtimeComService.handleDeviceCommandData(
       {
-        projectId,
+        projectId: data.projectId,
         deviceId,
         datastreamId: data.datastreamId,
         value: data.value,
@@ -53,23 +47,12 @@ export class RealtimeComController {
     );
   }
 
-  @EventPattern('/projects/+/devices/data', Transport.MQTT)
+  @EventPattern('/devices/+/z-datastreams/pair-result', Transport.MQTT)
   @IsPublic()
-  async handleDeviceZigbee2Mqtt(
+  async handlePairZDatastreamResult(
     @Ctx() ctx: MqttContext,
-    @Payload() data: DeviceDataMqttDto,
+    @Payload() data: { mac: string },
   ) {
-    const projectId = ctx.getTopic().split('/')[2];
-    const deviceAuthToken = ctx.getTopic().split('/')[4];
-
-    return this.realtimeComService.handleDeviceCommandData(
-      {
-        projectId,
-        deviceId: deviceAuthToken,
-        datastreamId: data.datastreamId,
-        value: data.value,
-      },
-      'MQTT',
-    );
+    return this.realtimeComService.handlePairZDatastreamResult(data.mac);
   }
 }

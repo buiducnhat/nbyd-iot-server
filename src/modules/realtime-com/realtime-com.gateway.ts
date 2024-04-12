@@ -17,6 +17,7 @@ import { PrismaService } from '@src/prisma/prisma.service';
 
 import { DeviceCommandWsDto } from './dto/device-command-ws.dto';
 import { JoinWsRoomProjectDto } from './dto/join-ws-room-project.dto';
+import { PairZDatastreamDto } from './dto/pair-zdatastream.dto';
 import { RealtimeComService } from './realtime-com.service';
 
 @WebSocketGateway({ cors: true })
@@ -77,6 +78,15 @@ export class RealtimeComGateway {
     );
   }
 
+  @SubscribeMessage('/z-datastreams/pair')
+  @UseGuards(JwtAuthWsGuard)
+  async handlePairZDatastream(
+    @MessageBody() input: PairZDatastreamDto,
+    @CurrentUser() user: User,
+  ) {
+    return this.realtimeComService.handlePairZDatastream(input, user);
+  }
+
   async emitDeviceDataUpdate(
     projectId: string,
     deviceId: string,
@@ -88,5 +98,9 @@ export class RealtimeComGateway {
       datastreamId,
       value,
     });
+  }
+
+  async emitPairZDatastream(result: any) {
+    this.server.to(result.userId).emit('/z-datastreams/pair/result', result);
   }
 }
