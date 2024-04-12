@@ -64,6 +64,7 @@ export class DevicesService {
         name: true,
         hardware: true,
         connection: true,
+        datastreams: true,
       },
       where: {
         authToken,
@@ -79,22 +80,20 @@ export class DevicesService {
       throw new CNotFoundException('Device not found');
     }
 
-    const datastreams =
-      await this.datastreamsService.getListByProject(projectId);
+    const datastreams = await this.datastreamsService.getList(projectId);
+    const datastreamValues = await this.datastreamsService.getValues(
+      device.datastreams.map((x) => x.id),
+    );
 
     return {
       ...device,
-      datastreams: datastreams
-        .filter((x) => x.deviceId === device.id)
-        .map((x) => {
-          const lastValue = x.histories[0]?.value ?? null;
-          delete x.histories;
-          delete x.deviceId;
-          return {
-            ...x,
-            lastValue,
-          };
-        }),
+      datastreams: datastreams.map((x) => {
+        const lastValue = datastreamValues.get(x.id)?.[0];
+        return {
+          ...x,
+          lastValue,
+        };
+      }),
     };
   }
 

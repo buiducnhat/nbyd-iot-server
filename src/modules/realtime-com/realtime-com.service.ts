@@ -7,7 +7,7 @@ import { EDeviceStatus } from '@prisma/client';
 import { TIME_1_MINUTE } from '@shared/constants/time.constant';
 
 import { DatastreamsService } from '@modules/datastreams/datastreams.service';
-import { CreateHistoryDto } from '@modules/datastreams/dto/create-historty.dto';
+import { AddValueDto } from '@modules/datastreams/dto/add-value.dto';
 
 import { PrismaService } from '@src/prisma/prisma.service';
 
@@ -96,7 +96,7 @@ export class RealtimeComService {
     );
   }
 
-  async handleDeviceCommandData(input: CreateHistoryDto, from: 'MQTT' | 'WS') {
+  async handleDeviceCommandData(input: AddValueDto, from: 'MQTT' | 'WS') {
     if (from === 'MQTT') {
       this.realtimeComGateway.emitDeviceDataUpdate(
         input.projectId,
@@ -106,15 +106,12 @@ export class RealtimeComService {
       );
     } else {
       // Publish the command to the MQTT broker
-      this.mqtt.emit(
-        `/projects/${input.projectId}/devices/${input.deviceId}/command`,
-        {
-          datastreamId: input.datastreamId,
-          value: input.value,
-        },
-      );
+      this.mqtt.emit(`/devices/${input.deviceId}/command`, {
+        datastreamId: input.datastreamId,
+        value: input.value,
+      });
     }
 
-    return this.datastreamsService.createHistory(input);
+    return this.datastreamsService.addValue(input);
   }
 }

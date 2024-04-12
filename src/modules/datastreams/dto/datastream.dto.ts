@@ -50,7 +50,7 @@ export class DatastreamBasicDto {
   description?: string;
 }
 
-export class DatastreamHistoryDto {
+export class DatastreamValueDto {
   @ApiProperty()
   value: string;
 
@@ -60,5 +60,5 @@ export class DatastreamHistoryDto {
 
 export class DatastreamDetailDto extends DatastreamBasicDto {
   @ApiProperty()
-  histories: DatastreamHistoryDto[];
+  values: DatastreamValueDto[];
 }

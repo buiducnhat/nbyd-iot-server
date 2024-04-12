@@ -1,4 +1,4 @@
-export class CreateHistoryDto {
+export class AddValueDto {
   projectId: string;
   deviceId: string;
   datastreamId: string;

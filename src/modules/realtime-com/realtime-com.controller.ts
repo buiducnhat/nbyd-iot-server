@@ -52,4 +52,24 @@ export class RealtimeComController {
       'MQTT',
     );
   }
+
+  @EventPattern('/projects/+/devices/data', Transport.MQTT)
+  @IsPublic()
+  async handleDeviceZigbee2Mqtt(
+    @Ctx() ctx: MqttContext,
+    @Payload() data: DeviceDataMqttDto,
+  ) {
+    const projectId = ctx.getTopic().split('/')[2];
+    const deviceAuthToken = ctx.getTopic().split('/')[4];
+
+    return this.realtimeComService.handleDeviceCommandData(
+      {
+        projectId,
+        deviceId: deviceAuthToken,
+        datastreamId: data.datastreamId,
+        value: data.value,
+      },
+      'MQTT',
+    );
+  }
 }

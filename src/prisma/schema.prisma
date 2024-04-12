@@ -196,6 +196,7 @@ model Datastream {
   iconId         Int?
   color          String?              @db.VarChar(20)
   type           EDatastreamType
+  mac            String?              @unique @db.VarChar(20)
   pin            String?              @db.VarChar(10)
   mode           EDatastreamMode?
   dataType       EDatastreamDataType?
@@ -204,7 +205,7 @@ model Datastream {
   defaultValue   String?
   unit           String?              @db.VarChar(50)
   enabledHistory Boolean              @default(false)
-  histories      DatastreamHistory[]
+  values         DatastreamValue[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -246,12 +247,12 @@ model Notification {
   @@index([userId, type, isRead])
 }
 
-model DatastreamHistory {
+model DatastreamValue {
   datastreamId String
   datastream   Datastream @relation(fields: [datastreamId], references: [id])
   value        String
   createdAt    DateTime   @default(now())
 
   @@unique([datastreamId, value, createdAt])
-  @@index(fields: [createdAt], map: "datastream_history_created_at_idx")
+  @@index(fields: [createdAt], map: "datastream_value_created_at_idx")
 }

@@ -19,13 +19,13 @@ import { ApiArrayResponse, ApiResponse } from '@shared/response';
 
 import { DatastreamsService } from '@modules/datastreams/datastreams.service';
 import { DatastreamDetailDto } from '@modules/datastreams/dto/datastream.dto';
-import { GetDatastreamByProjectDto } from '@modules/datastreams/dto/get-datastream-by-project.dto';
 
 import { CurrentUser } from '@src/decorators/current-user.decorator';
 import { JwtAuth } from '@src/decorators/jwt-auth.decorator';
 import { TransformResponseInterceptor } from '@src/interceptors/transform-response.interceptor';
 
 import { CreateProjectDto } from './dto/create-project.dto';
+import { GetListDatastreamDto } from './dto/get-list-datastream.dto';
 import { GetListProjectDto } from './dto/get-list-project.dto';
 import { ProjectBasicDto, ProjectDetailDto } from './dto/project.dto';
 import { UpdateProjectWebDashboardDto } from './dto/update-project-web-dashboard.dto';
@@ -114,9 +114,14 @@ export class ProjectsController {
   @ApiArrayResponse(DatastreamDetailDto)
   async getListDatastream(
     @Param('id') id: string,
-    @Query() query: GetDatastreamByProjectDto,
+    @Query() input: GetListDatastreamDto,
     @CurrentUser() user: User,
   ) {
-    return this.datastreamsService.getListByProject(id, query, user);
+    return this.datastreamsService.getList(
+      id,
+      undefined,
+      user,
+      input.needValues,
+    );
   }
 }
