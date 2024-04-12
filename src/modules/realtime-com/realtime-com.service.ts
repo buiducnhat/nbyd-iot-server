@@ -2,6 +2,7 @@ import { Inject, Injectable, Logger, forwardRef } from '@nestjs/common';
 import { ClientMqtt } from '@nestjs/microservices';
 import { SchedulerRegistry } from '@nestjs/schedule';
 
+import { InjectRedis } from '@nestjs-modules/ioredis';
 import { EDeviceStatus, User } from '@prisma/client';
 import { Redis } from 'ioredis';
 
@@ -31,7 +32,7 @@ export class RealtimeComService {
     private readonly schedulerRegistry: SchedulerRegistry,
     @Inject('MQTT_CLIENT') private readonly mqtt: ClientMqtt,
     private readonly datastreamsService: DatastreamsService,
-    private readonly redis: Redis,
+    @InjectRedis() private readonly redis: Redis,
   ) {}
 
   private async updateDeviceStatus(
