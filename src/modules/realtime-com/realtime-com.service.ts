@@ -126,10 +126,7 @@ export class RealtimeComService {
     });
 
     if (!device) {
-      return this.realtimeComGateway.emitPairZDatastream({
-        userId: user.id,
-        error: 'DEVICE_NOT_FOUND',
-      });
+      return;
     }
 
     if (input.mac) {
@@ -137,11 +134,7 @@ export class RealtimeComService {
         where: { mac: input.mac },
       });
       if (isExisted) {
-        return this.realtimeComGateway.emitPairZDatastream({
-          userId: user.id,
-          mac: input.mac,
-          error: 'MAC_ALREADY_EXISTED',
-        });
+        return;
       }
     }
 
@@ -185,6 +178,6 @@ export class RealtimeComService {
       },
     });
 
-    this.realtimeComGateway.emitPairZDatastream(datastream);
+    this.realtimeComGateway.emitPairZDatastream(datastream, cached.userId);
   }
 }

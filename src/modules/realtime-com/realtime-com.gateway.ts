@@ -7,7 +7,7 @@ import {
   WebSocketServer,
 } from '@nestjs/websockets';
 
-import { User } from '@prisma/client';
+import { Datastream, User } from '@prisma/client';
 import { Server, Socket } from 'socket.io';
 
 import { JwtAuthWsGuard } from '@modules/auth/guards/jwt-auth-ws.guard';
@@ -100,7 +100,7 @@ export class RealtimeComGateway {
     });
   }
 
-  async emitPairZDatastream(result: any) {
-    this.server.to(result.userId).emit('/z-datastreams/pair/result', result);
+  async emitPairZDatastream(data: Datastream, userId: number) {
+    this.server.to(String(userId)).emit('/z-datastreams/pair-result', data);
   }
 }
