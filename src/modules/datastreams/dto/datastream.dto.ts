@@ -25,6 +25,9 @@ export class DatastreamBasicDto {
   @ApiProperty({ enum: EDatastreamType })
   type: EDatastreamType;
 
+  @ApiProperty({ example: '00:11:22:33:44:55' })
+  mac?: string;
+
   @ApiProperty({ example: 'D0' })
   pin?: string;
 

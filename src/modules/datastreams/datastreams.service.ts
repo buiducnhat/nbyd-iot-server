@@ -236,7 +236,15 @@ export class DatastreamsService {
     const cachedDVs = await Promise.all(
       cachedKeys.map(async (key) => {
         const cachedDVsString = await this.redis.get(key);
-        return parseJson<DatastreamValue[]>(cachedDVsString, []);
+        const parsed = parseJson<DatastreamValue[]>(cachedDVsString, []).map(
+          (x) => {
+            if (typeof x.value !== 'string') {
+              x.value = JSON.stringify(x.value);
+            }
+            return x;
+          },
+        );
+        return parsed;
       }),
     );
 

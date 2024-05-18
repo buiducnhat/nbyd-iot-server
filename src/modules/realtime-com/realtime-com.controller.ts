@@ -11,6 +11,7 @@ import { IsPublic } from '@src/decorators/is-public.decorator';
 
 import { DeviceDataMqttDto } from './dto/device-data-mqtt.dto';
 import { DevicePingMqttDto } from './dto/device-status-mqtt.dto';
+import { PairZDatastreamResultDto } from './dto/pair-zdatastream.dto';
 import { RealtimeComService } from './realtime-com.service';
 
 @Controller('realtime-com')
@@ -51,8 +52,29 @@ export class RealtimeComController {
   @IsPublic()
   async handlePairZDatastreamResult(
     @Ctx() ctx: MqttContext,
-    @Payload() data: { mac: string },
+    @Payload() data: PairZDatastreamResultDto,
   ) {
-    return this.realtimeComService.handlePairZDatastreamResult(data.mac);
+    const deviceId = ctx.getTopic().split('/')[2];
+
+    return this.realtimeComService.handlePairZDatastreamResult(deviceId, data);
+  }
+
+  @EventPattern('/devices/+/z-datastreams/data', Transport.MQTT)
+  @IsPublic()
+  async handleZDatastreamData(
+    @Ctx() ctx: MqttContext,
+    @Payload() data: DeviceDataMqttDto,
+  ) {
+    const deviceId = ctx.getTopic().split('/')[2];
+
+    return this.realtimeComService.handleZDeviceData(
+      {
+        projectId: data.projectId,
+        deviceId,
+        datastreamId: data.datastreamId,
+        value: data.value,
+      },
+      'MQTT',
+    );
   }
 }

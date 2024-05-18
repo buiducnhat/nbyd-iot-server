@@ -80,7 +80,10 @@ export class DevicesService {
       throw new CNotFoundException('Device not found');
     }
 
-    const datastreams = await this.datastreamsService.getList(projectId);
+    const datastreams = await this.datastreamsService.getList(
+      projectId,
+      device.id,
+    );
     const datastreamValues = await this.datastreamsService.getValues(
       device.datastreams.map((x) => x.id),
     );

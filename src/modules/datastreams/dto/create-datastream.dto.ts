@@ -26,6 +26,10 @@ export class CreateDatastreamDto {
   @IsString()
   color?: string;
 
+  @IsOptional()
+  @IsString()
+  pin?: string;
+
   @IsEnum(EDatastreamType)
   type: EDatastreamType;
 
