@@ -8,28 +8,34 @@ CREATE TYPE "EGender" AS ENUM ('MALE', 'FEMALE', 'OTHER');
 CREATE TYPE "EUserExternalProvider" AS ENUM ('GOOGLE', 'FACEBOOK');
 
 -- CreateEnum
-CREATE TYPE "EProjStatus" AS ENUM ('ACTIVE', 'INACTIVE');
+CREATE TYPE "EProjectStatus" AS ENUM ('ACTIVE', 'INACTIVE');
 
 -- CreateEnum
 CREATE TYPE "EProjectMemberRole" AS ENUM ('OWNER', 'DEVELOPER', 'GUEST');
 
 -- CreateEnum
-CREATE TYPE "EDeviceStatus" AS ENUM ('ONLINE', 'OFFLINE');
+CREATE TYPE "EGatewayStatus" AS ENUM ('ONLINE', 'OFFLINE');
 
 -- CreateEnum
-CREATE TYPE "EDeviceHardware" AS ENUM ('ESP8266', 'ESP32', 'RASPBERRY_PI');
+CREATE TYPE "EGatewayHardware" AS ENUM ('ESP8266', 'ESP32', 'RASPBERRY_PI');
 
 -- CreateEnum
-CREATE TYPE "EDeviceConnection" AS ENUM ('WIFI', 'ETHERNET');
+CREATE TYPE "EGatewayConnection" AS ENUM ('WIFI', 'ETHERNET');
 
 -- CreateEnum
-CREATE TYPE "EDatastreamPinType" AS ENUM ('DIGITAL', 'ANALOG', 'VIRTUAL');
+CREATE TYPE "EDeviceType" AS ENUM ('DIGITAL', 'ANALOG', 'VIRTUAL', 'ZIGBEE');
 
 -- CreateEnum
-CREATE TYPE "EDatastreamPinMode" AS ENUM ('INPUT', 'OUTPUT', 'INPUT_PULLUP', 'INPUT_PULLDOWN');
+CREATE TYPE "EDeviceMode" AS ENUM ('INPUT', 'OUTPUT', 'INPUT_PULLUP', 'INPUT_PULLDOWN');
 
 -- CreateEnum
-CREATE TYPE "EDatastreamDataType" AS ENUM ('BOOLEAN', 'INTEGER', 'FLOAT', 'STRING');
+CREATE TYPE "EDeviceDataType" AS ENUM ('INTEGER', 'FLOAT', 'STRING', 'JSON');
+
+-- CreateEnum
+CREATE TYPE "EAppType" AS ENUM ('NBYD_WEBAPP', 'NBYD_MOBILEAPP');
+
+-- CreateEnum
+CREATE TYPE "ENotificationType" AS ENUM ('GENERAL');
 
 -- CreateTable
 CREATE TABLE "User" (
@@ -38,12 +44,12 @@ CREATE TABLE "User" (
     "lastName" VARCHAR(50),
     "gender" "EGender",
     "dateOfBirth" TIMESTAMP(3),
-    "avatarFileId" TEXT,
+    "avatarImageFileId" TEXT,
+    "avatarImageFileUrl" TEXT,
     "phoneNumber" VARCHAR(15),
     "roles" "ERole"[] DEFAULT ARRAY['USER']::"ERole"[],
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
-    "deletedAt" TIMESTAMP(3),
 
     CONSTRAINT "User_pkey" PRIMARY KEY ("id")
 );
@@ -61,7 +67,6 @@ CREATE TABLE "UserLogin" (
     "passwordResetTokenAt" TIMESTAMP(3),
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
-    "deletedAt" TIMESTAMP(3),
 
     CONSTRAINT "UserLogin_pkey" PRIMARY KEY ("userId")
 );
@@ -76,7 +81,6 @@ CREATE TABLE "UserSession" (
     "userIp" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
-    "deletedAt" TIMESTAMP(3),
 
     CONSTRAINT "UserSession_pkey" PRIMARY KEY ("id")
 );
@@ -90,39 +94,24 @@ CREATE TABLE "UserExternal" (
     "providerToken" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
-    "deletedAt" TIMESTAMP(3),
 
     CONSTRAINT "UserExternal_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "File" (
-    "id" TEXT NOT NULL,
-    "name" VARCHAR(255) NOT NULL,
-    "path" VARCHAR(255) NOT NULL,
-    "size" INTEGER NOT NULL,
-    "mimeType" VARCHAR(50) NOT NULL,
-    "createdById" INTEGER,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL,
-    "deletedAt" TIMESTAMP(3),
-
-    CONSTRAINT "File_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
 CREATE TABLE "Project" (
     "id" TEXT NOT NULL,
     "name" VARCHAR(50) NOT NULL,
+    "imageFileId" TEXT,
+    "imageFileUrl" TEXT,
     "description" VARCHAR(255),
     "metaData" JSONB,
-    "status" "EProjStatus" NOT NULL DEFAULT 'ACTIVE',
+    "status" "EProjectStatus" NOT NULL DEFAULT 'ACTIVE',
+    "location" DOUBLE PRECISION[] DEFAULT ARRAY[]::DOUBLE PRECISION[],
     "webDashboard" JSONB,
     "mobileDashboard" JSONB,
-    "imageFileId" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
-    "deletedAt" TIMESTAMP(3),
 
     CONSTRAINT "Project_pkey" PRIMARY KEY ("id")
 );
@@ -137,7 +126,7 @@ CREATE TABLE "ProjectMember" (
 );
 
 -- CreateTable
-CREATE TABLE "Device" (
+CREATE TABLE "Gateway" (
     "id" TEXT NOT NULL,
     "projectId" TEXT NOT NULL,
     "name" VARCHAR(50) NOT NULL,
@@ -145,58 +134,91 @@ CREATE TABLE "Device" (
     "authToken" TEXT,
     "authTokenExpiry" TIMESTAMP(3),
     "imageFileId" TEXT,
-    "status" "EDeviceStatus" NOT NULL DEFAULT 'OFFLINE',
-    "hardware" "EDeviceHardware" NOT NULL,
-    "connection" "EDeviceConnection" NOT NULL,
+    "imageFileUrl" TEXT,
+    "status" "EGatewayStatus" NOT NULL DEFAULT 'OFFLINE',
+    "hardware" "EGatewayHardware" NOT NULL,
+    "connection" "EGatewayConnection" NOT NULL,
     "metaData" JSONB,
     "lastOnline" TIMESTAMP(3),
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
-    "deletedAt" TIMESTAMP(3),
+
+    CONSTRAINT "Gateway_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "Device" (
+    "id" TEXT NOT NULL,
+    "gatewayId" TEXT NOT NULL,
+    "name" VARCHAR(50) NOT NULL,
+    "iconId" INTEGER,
+    "color" VARCHAR(20),
+    "type" "EDeviceType" NOT NULL,
+    "mac" VARCHAR(20),
+    "pin" VARCHAR(50),
+    "mode" "EDeviceMode",
+    "dataType" "EDeviceDataType",
+    "minValue" DOUBLE PRECISION,
+    "maxValue" DOUBLE PRECISION,
+    "defaultValue" TEXT,
+    "unit" VARCHAR(50),
+    "enabledHistory" BOOLEAN NOT NULL DEFAULT false,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "Device_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
-CREATE TABLE "Datastream" (
-    "id" TEXT NOT NULL,
-    "deviceId" TEXT NOT NULL,
-    "name" VARCHAR(50) NOT NULL,
-    "iconId" INTEGER NOT NULL DEFAULT 0,
-    "color" VARCHAR(7) NOT NULL DEFAULT '#ffffff',
-    "pinType" "EDatastreamPinType" NOT NULL,
-    "pinMode" "EDatastreamPinMode",
-    "dataType" "EDatastreamDataType",
-    "minValue" DOUBLE PRECISION,
-    "maxValue" DOUBLE PRECISION,
-    "defaultValue" TEXT,
-    "unit" VARCHAR(50),
-    "enabled" BOOLEAN NOT NULL DEFAULT true,
-    "enabledHistory" BOOLEAN NOT NULL DEFAULT false,
+CREATE TABLE "FcmToken" (
+    "token" TEXT NOT NULL,
+    "userId" INTEGER NOT NULL,
+    "appType" "EAppType" NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL,
-    "deletedAt" TIMESTAMP(3),
 
-    CONSTRAINT "Datastream_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "FcmToken_pkey" PRIMARY KEY ("token","userId")
 );
 
--- CreateIndex
-CREATE UNIQUE INDEX "User_avatarFileId_key" ON "User"("avatarFileId");
+-- CreateTable
+CREATE TABLE "Notification" (
+    "id" TEXT NOT NULL,
+    "type" "ENotificationType" NOT NULL DEFAULT 'GENERAL',
+    "data" JSONB,
+    "userId" INTEGER NOT NULL,
+    "isRead" BOOLEAN NOT NULL DEFAULT false,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "Notification_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "DeviceValue" (
+    "deviceId" TEXT NOT NULL,
+    "value" TEXT NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
 
 -- CreateIndex
 CREATE UNIQUE INDEX "UserExternal_userId_key" ON "UserExternal"("userId");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "Project_imageFileId_key" ON "Project"("imageFileId");
+CREATE UNIQUE INDEX "Gateway_authToken_key" ON "Gateway"("authToken");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "Device_authToken_key" ON "Device"("authToken");
+CREATE UNIQUE INDEX "Device_mac_key" ON "Device"("mac");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "Device_imageFileId_key" ON "Device"("imageFileId");
+CREATE INDEX "Device_gatewayId_idx" ON "Device"("gatewayId");
 
--- AddForeignKey
-ALTER TABLE "User" ADD CONSTRAINT "User_avatarFileId_fkey" FOREIGN KEY ("avatarFileId") REFERENCES "File"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+-- CreateIndex
+CREATE INDEX "Notification_userId_type_isRead_idx" ON "Notification"("userId", "type", "isRead");
+
+-- CreateIndex
+CREATE INDEX "device_value_created_at_idx" ON "DeviceValue"("createdAt");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "DeviceValue_deviceId_value_createdAt_key" ON "DeviceValue"("deviceId", "value", "createdAt");
 
 -- AddForeignKey
 ALTER TABLE "UserLogin" ADD CONSTRAINT "UserLogin_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -208,22 +230,22 @@ ALTER TABLE "UserSession" ADD CONSTRAINT "UserSession_userId_fkey" FOREIGN KEY (
 ALTER TABLE "UserExternal" ADD CONSTRAINT "UserExternal_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "File" ADD CONSTRAINT "File_createdById_fkey" FOREIGN KEY ("createdById") REFERENCES "User"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "ProjectMember" ADD CONSTRAINT "ProjectMember_projectId_fkey" FOREIGN KEY ("projectId") REFERENCES "Project"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Project" ADD CONSTRAINT "Project_imageFileId_fkey" FOREIGN KEY ("imageFileId") REFERENCES "File"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "ProjectMember" ADD CONSTRAINT "ProjectMember_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "ProjectMember" ADD CONSTRAINT "ProjectMember_projectId_fkey" FOREIGN KEY ("projectId") REFERENCES "Project"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Gateway" ADD CONSTRAINT "Gateway_projectId_fkey" FOREIGN KEY ("projectId") REFERENCES "Project"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "ProjectMember" ADD CONSTRAINT "ProjectMember_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Device" ADD CONSTRAINT "Device_gatewayId_fkey" FOREIGN KEY ("gatewayId") REFERENCES "Gateway"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Device" ADD CONSTRAINT "Device_projectId_fkey" FOREIGN KEY ("projectId") REFERENCES "Project"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "FcmToken" ADD CONSTRAINT "FcmToken_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Device" ADD CONSTRAINT "Device_imageFileId_fkey" FOREIGN KEY ("imageFileId") REFERENCES "File"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "Notification" ADD CONSTRAINT "Notification_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Datastream" ADD CONSTRAINT "Datastream_deviceId_fkey" FOREIGN KEY ("deviceId") REFERENCES "Device"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "DeviceValue" ADD CONSTRAINT "DeviceValue_deviceId_fkey" FOREIGN KEY ("deviceId") REFERENCES "Device"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
