@@ -17,15 +17,15 @@ import { User } from '@prisma/client';
 
 import { ApiArrayResponse, ApiResponse } from '@shared/response';
 
-import { DatastreamsService } from '@modules/datastreams/datastreams.service';
-import { DatastreamDetailDto } from '@modules/datastreams/dto/datastream.dto';
+import { DevicesService } from '@modules/devices/devices.service';
+import { DeviceDetailDto } from '@modules/devices/dto/device.dto';
 
 import { CurrentUser } from '@src/decorators/current-user.decorator';
 import { JwtAuth } from '@src/decorators/jwt-auth.decorator';
 import { TransformResponseInterceptor } from '@src/interceptors/transform-response.interceptor';
 
 import { CreateProjectDto } from './dto/create-project.dto';
-import { GetListDatastreamDto } from './dto/get-list-datastream.dto';
+import { GetListDeviceDto } from './dto/get-list-device.dto';
 import { GetListProjectDto } from './dto/get-list-project.dto';
 import { ProjectBasicDto, ProjectDetailDto } from './dto/project.dto';
 import { UpdateProjectWebDashboardDto } from './dto/update-project-web-dashboard.dto';
@@ -40,7 +40,7 @@ import { ProjectsService } from './projects.service';
 export class ProjectsController {
   constructor(
     private readonly projectsService: ProjectsService,
-    private readonly datastreamsService: DatastreamsService,
+    private readonly devicesService: DevicesService,
   ) {}
 
   @Post()
@@ -110,18 +110,13 @@ export class ProjectsController {
     return this.projectsService.uploadImage(id, file, user);
   }
 
-  @Get('/:id/datastreams')
-  @ApiArrayResponse(DatastreamDetailDto)
-  async getListDatastream(
+  @Get('/:id/devices')
+  @ApiArrayResponse(DeviceDetailDto)
+  async getListDevice(
     @Param('id') id: string,
-    @Query() input: GetListDatastreamDto,
+    @Query() input: GetListDeviceDto,
     @CurrentUser() user: User,
   ) {
-    return this.datastreamsService.getList(
-      id,
-      undefined,
-      user,
-      input.needValues,
-    );
+    return this.devicesService.getList(id, undefined, user, input.needValues);
   }
 }

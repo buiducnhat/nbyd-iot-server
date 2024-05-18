@@ -7,7 +7,7 @@ import {
   WebSocketServer,
 } from '@nestjs/websockets';
 
-import { Datastream, User } from '@prisma/client';
+import { Device, User } from '@prisma/client';
 import { Server, Socket } from 'socket.io';
 
 import { JwtAuthWsGuard } from '@modules/auth/guards/jwt-auth-ws.guard';
@@ -17,7 +17,7 @@ import { PrismaService } from '@src/prisma/prisma.service';
 
 import { GatewayCommandWsDto } from './dto/gateway-command-ws.dto';
 import { JoinWsRoomProjectDto } from './dto/join-ws-room-project.dto';
-import { PairZDatastreamDto } from './dto/pair-zdatastream.dto';
+import { PairZDeviceDto } from './dto/pair-z-device.dto';
 import { RealtimeComService } from './realtime-com.service';
 
 @WebSocketGateway({ cors: true })
@@ -71,36 +71,36 @@ export class RealtimeComGateway {
       {
         projectId: input.projectId,
         gatewayId: input.gatewayId,
-        datastreamId: input.datastreamId,
+        deviceId: input.deviceId,
         value: input.value,
       },
       'WS',
     );
   }
 
-  @SubscribeMessage('/z-datastreams/pair')
+  @SubscribeMessage('/z-devices/pair')
   @UseGuards(JwtAuthWsGuard)
-  async handlePairZDatastream(
-    @MessageBody() input: PairZDatastreamDto,
+  async handlePairZDevice(
+    @MessageBody() input: PairZDeviceDto,
     @CurrentUser() user: User,
   ) {
-    return this.realtimeComService.handlePairZDatastream(input, user);
+    return this.realtimeComService.handlePairZDevice(input, user);
   }
 
   async emitGatewayDataUpdate(
     projectId: string,
     gatewayId: string,
-    datastreamId: string,
+    deviceId: string,
     value: string,
   ) {
     this.server.to(`/projects/${projectId}`).emit('/gateways/data', {
       gatewayId,
-      datastreamId,
+      deviceId,
       value,
     });
   }
 
-  async emitPairZDatastream(data: Datastream, userId: number) {
-    this.server.to(String(userId)).emit('/z-datastreams/pair-result', data);
+  async emitPairZDevice(data: Device, userId: number) {
+    this.server.to(String(userId)).emit('/z-devices/pair-result', data);
   }
 }

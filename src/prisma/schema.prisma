@@ -107,7 +107,7 @@ model Project {
   webDashboard    Json?
   mobileDashboard Json?
   members         ProjectMember[]
-  gateways         Gateway[]
+  gateways        Gateway[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -146,12 +146,12 @@ enum EGatewayConnection {
 }
 
 model Gateway {
-  id              String            @id @default(uuid())
+  id              String             @id @default(uuid())
   projectId       String
-  project         Project           @relation(fields: [projectId], references: [id])
-  name            String            @db.VarChar(50)
-  description     String?           @db.VarChar(255)
-  authToken       String?           @unique
+  project         Project            @relation(fields: [projectId], references: [id])
+  name            String             @db.VarChar(50)
+  description     String?            @db.VarChar(255)
+  authToken       String?            @unique
   authTokenExpiry DateTime?
   imageFileId     String?
   imageFileUrl    String?
@@ -161,51 +161,51 @@ model Gateway {
   /// [TGatewayMetaData]
   metaData        Json?
   lastOnline      DateTime?
-  datastreams     Datastream[]
+  devices         Device[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
-enum EDatastreamType {
+enum EDeviceType {
   DIGITAL
   ANALOG
   VIRTUAL
   ZIGBEE
 }
 
-enum EDatastreamMode {
+enum EDeviceMode {
   INPUT
   OUTPUT
   INPUT_PULLUP
   INPUT_PULLDOWN
 }
 
-enum EDatastreamDataType {
+enum EDeviceDataType {
   INTEGER
   FLOAT
   STRING
   JSON
 }
 
-model Datastream {
-  id             String               @id @default(uuid())
-  gatewayId       String
-  gateway         Gateway               @relation(fields: [gatewayId], references: [id])
-  name           String               @db.VarChar(50)
+model Device {
+  id             String           @id @default(uuid())
+  gatewayId      String
+  gateway        Gateway          @relation(fields: [gatewayId], references: [id])
+  name           String           @db.VarChar(50)
   iconId         Int?
-  color          String?              @db.VarChar(20)
-  type           EDatastreamType
-  mac            String?              @unique @db.VarChar(20)
-  pin            String?              @db.VarChar(50)
-  mode           EDatastreamMode?
-  dataType       EDatastreamDataType?
+  color          String?          @db.VarChar(20)
+  type           EDeviceType
+  mac            String?          @unique @db.VarChar(20)
+  pin            String?          @db.VarChar(50)
+  mode           EDeviceMode?
+  dataType       EDeviceDataType?
   minValue       Float?
   maxValue       Float?
   defaultValue   String?
-  unit           String?              @db.VarChar(50)
-  enabledHistory Boolean              @default(false)
-  values         DatastreamValue[]
+  unit           String?          @db.VarChar(50)
+  enabledHistory Boolean          @default(false)
+  values         DeviceValue[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -247,12 +247,12 @@ model Notification {
   @@index([userId, type, isRead])
 }
 
-model DatastreamValue {
-  datastreamId String
-  datastream   Datastream @relation(fields: [datastreamId], references: [id])
-  value        String
-  createdAt    DateTime   @default(now())
+model DeviceValue {
+  deviceId  String
+  device    Device   @relation(fields: [deviceId], references: [id])
+  value     String
+  createdAt DateTime @default(now())
 
-  @@unique([datastreamId, value, createdAt])
-  @@index(fields: [createdAt], map: "datastream_value_created_at_idx")
+  @@unique([deviceId, value, createdAt])
+  @@index(fields: [createdAt], map: "device_value_created_at_idx")
 }

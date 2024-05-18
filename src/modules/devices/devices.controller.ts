@@ -17,61 +17,61 @@ import { CurrentUser } from '@src/decorators/current-user.decorator';
 import { JwtAuth } from '@src/decorators/jwt-auth.decorator';
 import { TransformResponseInterceptor } from '@src/interceptors/transform-response.interceptor';
 
-import { DatastreamsService } from './datastreams.service';
-import { CreateDatastreamDto } from './dto/create-datastream.dto';
-import { DatastreamBasicDto } from './dto/datastream.dto';
-import { DeleteManyDatastreamsDto } from './dto/delete-many-datastreams.dto';
+import { DevicesService } from './devices.service';
+import { CreateDeviceDto } from './dto/create-device.dto';
+import { DeleteManyDevicesDto } from './dto/delete-many-devices.dto';
+import { DeviceBasicDto } from './dto/device.dto';
 
-@Controller('projects/:projectId/gateways/:gatewayId/datastreams')
-@ApiTags('Datastreams')
+@Controller('projects/:projectId/gateways/:gatewayId/devices')
+@ApiTags('Devices')
 @ApiBearerAuth()
 @JwtAuth()
 @UseInterceptors(TransformResponseInterceptor)
-export class DatastreamsController {
-  constructor(private readonly datastreamService: DatastreamsService) {}
+export class DevicesController {
+  constructor(private readonly deviceService: DevicesService) {}
 
   @Post()
-  @ApiResponse(DatastreamBasicDto)
+  @ApiResponse(DeviceBasicDto)
   async create(
     @Param('projectId') projectId: string,
     @Param('gatewayId') gatewayId: string,
-    @Body() input: CreateDatastreamDto,
+    @Body() input: CreateDeviceDto,
     @CurrentUser() user: User,
   ) {
-    return this.datastreamService.create(input, gatewayId, projectId, user);
+    return this.deviceService.create(input, gatewayId, projectId, user);
   }
 
   @Patch(':id')
-  @ApiResponse(DatastreamBasicDto)
+  @ApiResponse(DeviceBasicDto)
   async update(
     @Param('projectId') projectId: string,
     @Param('gatewayId') gatewayId: string,
     @Param('id') id: string,
-    @Body() input: CreateDatastreamDto,
+    @Body() input: CreateDeviceDto,
     @CurrentUser() user: User,
   ) {
-    return this.datastreamService.update(input, id, gatewayId, projectId, user);
+    return this.deviceService.update(input, id, gatewayId, projectId, user);
   }
 
   @Delete(':id')
-  @ApiResponse(DatastreamBasicDto)
+  @ApiResponse(DeviceBasicDto)
   async delete(
     @Param('projectId') projectId: string,
     @Param('gatewayId') gatewayId: string,
     @Param('id') id: string,
     @CurrentUser() user: User,
   ) {
-    return this.datastreamService.delete(id, gatewayId, projectId, user);
+    return this.deviceService.delete(id, gatewayId, projectId, user);
   }
 
   @Delete()
-  @ApiResponse(DatastreamBasicDto)
+  @ApiResponse(DeviceBasicDto)
   async deleteMany(
     @Param('projectId') projectId: string,
     @Param('gatewayId') gatewayId: string,
-    @Body() input: DeleteManyDatastreamsDto,
+    @Body() input: DeleteManyDevicesDto,
     @CurrentUser() user: User,
   ) {
-    return this.datastreamService.deleteMany(input, gatewayId, projectId, user);
+    return this.deviceService.deleteMany(input, gatewayId, projectId, user);
   }
 }

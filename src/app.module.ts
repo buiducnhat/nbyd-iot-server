@@ -22,7 +22,7 @@ import { HealthsController } from '@src/healths/health.controller';
 import { PrismaModule } from '@src/prisma/prisma.module';
 
 import { TConfigs } from './configs';
-import { DatastreamsModule } from './modules/datastreams/datastreams.module';
+import { DevicesModule } from './modules/devices/devices.module';
 import { RealtimeComModule } from './modules/realtime-com/realtime-com.module';
 
 @Module({
@@ -47,7 +47,7 @@ import { RealtimeComModule } from './modules/realtime-com/realtime-com.module';
     UsersModule,
     ProjectsModule,
     GatewaysModule,
-    DatastreamsModule,
+    DevicesModule,
     RealtimeComModule,
     FirebasesModule,
   ],

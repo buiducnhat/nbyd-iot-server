@@ -5,7 +5,7 @@ export class GatewayDataMqttDto {
   projectId: string;
 
   @IsString()
-  datastreamId: string;
+  deviceId: string;
 
   @IsString()
   value: string;

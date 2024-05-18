@@ -1,14 +1,7 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-
-import {
-  EDatastreamDataType,
-  EDatastreamMode,
-  EDatastreamType,
-} from '@prisma/client';
+import { EDeviceDataType, EDeviceMode, EDeviceType } from '@prisma/client';
 import {
   IsBoolean,
   IsEnum,
-  IsHexColor,
   IsInt,
   IsNumber,
   IsOptional,
@@ -16,7 +9,7 @@ import {
   MaxLength,
 } from 'class-validator';
 
-export class CreateDatastreamDto {
+export class CreateDeviceDto {
   @IsString()
   @MaxLength(50)
   name: string;
@@ -26,27 +19,23 @@ export class CreateDatastreamDto {
   iconId?: number;
 
   @IsOptional()
-  @IsHexColor()
+  @IsString()
   color?: string;
-
-  @ApiProperty({ enum: EDatastreamType })
-  @IsEnum(EDatastreamType)
-  type: EDatastreamType;
 
   @IsOptional()
   @IsString()
-  @MaxLength(10)
   pin?: string;
 
-  @ApiPropertyOptional({ enum: EDatastreamMode })
-  @IsOptional()
-  @IsEnum(EDatastreamMode)
-  mode?: EDatastreamMode;
+  @IsEnum(EDeviceType)
+  type: EDeviceType;
 
-  @ApiPropertyOptional({ enum: EDatastreamDataType })
   @IsOptional()
-  @IsEnum(EDatastreamDataType)
-  dataType?: EDatastreamDataType;
+  @IsEnum(EDeviceMode)
+  mode?: EDeviceMode;
+
+  @IsOptional()
+  @IsEnum(EDeviceDataType)
+  dataType?: EDeviceDataType;
 
   @IsOptional()
   @IsNumber()

@@ -1,6 +1,6 @@
 import { IsString } from 'class-validator';
 
-export class DeleteManyDatastreamsDto {
+export class DeleteManyDevicesDto {
   @IsString({ each: true })
   ids: string[];
 }

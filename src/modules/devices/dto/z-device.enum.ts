@@ -1,4 +1,4 @@
-export enum ZDatastreamPin {
+export enum ZDevicePin {
   DOOR_SENSOR = 'DOOR_SENSOR',
   MOTION_SENSOR = 'MOTION_SENSOR',
   TEMPERATURE_SENSOR = 'TEMPERATURE_SENSOR',

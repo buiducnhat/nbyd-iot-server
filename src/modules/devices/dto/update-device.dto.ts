@@ -1,4 +1,4 @@
-import { EDatastreamDataType, EDatastreamMode } from '@prisma/client';
+import { EDeviceDataType, EDeviceMode } from '@prisma/client';
 import {
   IsBoolean,
   IsEnum,
@@ -9,7 +9,7 @@ import {
   MaxLength,
 } from 'class-validator';
 
-export class UpdateDatastreamDto {
+export class UpdateDeviceDto {
   @IsOptional()
   @IsString()
   @MaxLength(50)
@@ -28,12 +28,12 @@ export class UpdateDatastreamDto {
   pin?: string;
 
   @IsOptional()
-  @IsEnum(EDatastreamMode)
-  mode?: EDatastreamMode;
+  @IsEnum(EDeviceMode)
+  mode?: EDeviceMode;
 
   @IsOptional()
-  @IsEnum(EDatastreamDataType)
-  dataType?: EDatastreamDataType;
+  @IsEnum(EDeviceDataType)
+  dataType?: EDeviceDataType;
 
   @IsOptional()
   @IsNumber()

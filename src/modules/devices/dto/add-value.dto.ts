@@ -1,6 +1,6 @@
 export class AddValueDto {
   projectId: string;
   gatewayId: string;
-  datastreamId: string;
+  deviceId: string;
   value: string;
 }

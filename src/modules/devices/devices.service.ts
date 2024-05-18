@@ -2,7 +2,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 
 import { InjectRedis } from '@nestjs-modules/ioredis';
-import { DatastreamValue, User } from '@prisma/client';
+import { DeviceValue, User } from '@prisma/client';
 import Redis from 'ioredis';
 
 import { parseJson } from '@shared/helpers/parse-json.helper';
@@ -12,12 +12,12 @@ import { ProjectsService } from '@modules/projects/projects.service';
 import { PrismaService } from '@src/prisma/prisma.service';
 
 import { AddValueDto } from './dto/add-value.dto';
-import { CreateDatastreamDto } from './dto/create-datastream.dto';
-import { DeleteManyDatastreamsDto } from './dto/delete-many-datastreams.dto';
-import { UpdateDatastreamDto } from './dto/update-datastream.dto';
+import { CreateDeviceDto } from './dto/create-device.dto';
+import { DeleteManyDevicesDto } from './dto/delete-many-devices.dto';
+import { UpdateDeviceDto } from './dto/update-device.dto';
 
 @Injectable()
-export class DatastreamsService {
+export class DevicesService {
   constructor(
     private readonly prisma: PrismaService,
     @Inject(ProjectsService) private readonly projectsService: ProjectsService,
@@ -25,12 +25,12 @@ export class DatastreamsService {
   ) {}
 
   async create(
-    input: CreateDatastreamDto,
+    input: CreateDeviceDto,
     gatewayId: string,
     projectId: string,
     user: User,
   ) {
-    return this.prisma.datastream.create({
+    return this.prisma.device.create({
       data: {
         ...input,
         gateway: {
@@ -47,13 +47,13 @@ export class DatastreamsService {
   }
 
   async update(
-    input: UpdateDatastreamDto,
+    input: UpdateDeviceDto,
     id: string,
     gatewayId: string,
     projectId: string,
     user: User,
   ) {
-    return this.prisma.datastream.update({
+    return this.prisma.device.update({
       where: {
         id: id,
         gatewayId: gatewayId,
@@ -69,7 +69,7 @@ export class DatastreamsService {
   }
 
   async delete(id: string, gatewayId: string, projectId: string, user: User) {
-    return this.prisma.datastream.delete({
+    return this.prisma.device.delete({
       where: {
         id: id,
         gatewayId: gatewayId,
@@ -84,12 +84,12 @@ export class DatastreamsService {
   }
 
   async deleteMany(
-    input: DeleteManyDatastreamsDto,
+    input: DeleteManyDevicesDto,
     gatewayId: string,
     projectId: string,
     user: User,
   ) {
-    return this.prisma.datastream.deleteMany({
+    return this.prisma.device.deleteMany({
       where: {
         id: {
           in: input.ids,
@@ -111,7 +111,7 @@ export class DatastreamsService {
     user?: User,
     needValues?: boolean,
   ) {
-    const datastreams = await this.prisma.datastream.findMany({
+    const devices = await this.prisma.device.findMany({
       where: {
         gateway: {
           id: gatewayId ? gatewayId : undefined,
@@ -126,57 +126,53 @@ export class DatastreamsService {
     });
 
     if (needValues) {
-      const datastreamValues = await this.getValues(
-        datastreams.map((x) => x.id),
-      );
+      const deviceValues = await this.getValues(devices.map((x) => x.id));
 
-      return datastreams.map((x) => {
+      return devices.map((x) => {
         return {
           ...x,
-          values: datastreamValues.get(x.id),
+          values: deviceValues.get(x.id),
         };
       });
     }
 
-    return datastreams;
+    return devices;
   }
 
-  async getValues(
-    datastreamIds: string[],
-  ): Promise<Map<string, DatastreamValue[]>> {
-    const valuesMap = new Map<string, DatastreamValue[]>();
-    for (const id of datastreamIds) {
+  async getValues(deviceIds: string[]): Promise<Map<string, DeviceValue[]>> {
+    const valuesMap = new Map<string, DeviceValue[]>();
+    for (const id of deviceIds) {
       valuesMap.set(id, []);
     }
 
-    const cachedKeys = await this.redis.keys('/datastreams/*/values');
+    const cachedKeys = await this.redis.keys('/devices/*/values');
     for (const key of cachedKeys) {
       const cachedDVsString = await this.redis.get(key);
-      const cachedDVs = parseJson<DatastreamValue[]>(cachedDVsString, []);
+      const cachedDVs = parseJson<DeviceValue[]>(cachedDVsString, []);
 
-      const datastreamId = key.split('/')[2];
-      valuesMap.set(datastreamId, cachedDVs);
+      const deviceId = key.split('/')[2];
+      valuesMap.set(deviceId, cachedDVs);
     }
 
-    const notCachedIds = datastreamIds.filter(
-      (id) => !cachedKeys.includes(`/datastreams/${id}/values`),
+    const notCachedIds = deviceIds.filter(
+      (id) => !cachedKeys.includes(`/devices/${id}/values`),
     );
     if (notCachedIds.length) {
-      const values = await this.prisma.datastreamValue.findMany({
+      const values = await this.prisma.deviceValue.findMany({
         where: {
-          datastreamId: {
+          deviceId: {
             in: notCachedIds,
           },
         },
       });
 
       for (const v of values) {
-        valuesMap.get(v.datastreamId).push(v);
+        valuesMap.get(v.deviceId).push(v);
       }
 
       for (const id of notCachedIds) {
         await this.redis.set(
-          `/datastreams/${id}/values`,
+          `/devices/${id}/values`,
           JSON.stringify(valuesMap.get(id)),
         );
       }
@@ -185,58 +181,56 @@ export class DatastreamsService {
     return valuesMap;
   }
 
-  async addValue({ datastreamId, value }: AddValueDto) {
-    const cachedDVsString = await this.redis.get(
-      `/datastreams/${datastreamId}/values`,
-    );
-    let cachedDVs = parseJson<DatastreamValue[]>(cachedDVsString, null);
+  async addValue({ deviceId, value }: AddValueDto) {
+    const cachedDVsString = await this.redis.get(`/devices/${deviceId}/values`);
+    let cachedDVs = parseJson<DeviceValue[]>(cachedDVsString, null);
 
-    const datastream = await this.prisma.datastream.findUnique({
-      where: { id: datastreamId },
+    const device = await this.prisma.device.findUnique({
+      where: { id: deviceId },
       select: {
         id: true,
         values: !cachedDVs ? true : false,
       },
     });
 
-    if (!datastream) {
+    if (!device) {
       return;
     }
 
     if (cachedDVs) {
       cachedDVs.unshift({
-        datastreamId,
+        deviceId,
         value,
         createdAt: new Date(),
       });
-      datastream.values = cachedDVs;
+      device.values = cachedDVs;
     } else {
-      if (!datastream.values) {
-        datastream.values = [];
+      if (!device.values) {
+        device.values = [];
       }
-      datastream.values.unshift({
-        datastreamId,
+      device.values.unshift({
+        deviceId,
         value,
         createdAt: new Date(),
       });
-      cachedDVs = datastream.values;
+      cachedDVs = device.values;
     }
 
     await this.redis.set(
-      `/datastreams/${datastreamId}/values`,
+      `/devices/${deviceId}/values`,
       JSON.stringify(cachedDVs),
     );
 
-    return datastream;
+    return device;
   }
 
   @Cron(CronExpression.EVERY_5_MINUTES)
   async syncCachedDVsToDb() {
-    const cachedKeys = await this.redis.keys('/datastreams/*/values');
+    const cachedKeys = await this.redis.keys('/devices/*/values');
     const cachedDVs = await Promise.all(
       cachedKeys.map(async (key) => {
         const cachedDVsString = await this.redis.get(key);
-        const parsed = parseJson<DatastreamValue[]>(cachedDVsString, []).map(
+        const parsed = parseJson<DeviceValue[]>(cachedDVsString, []).map(
           (x) => {
             if (typeof x.value !== 'string') {
               x.value = JSON.stringify(x.value);
@@ -250,7 +244,7 @@ export class DatastreamsService {
 
     const values = cachedDVs.flat();
     if (values.length) {
-      await this.prisma.datastreamValue.createMany({
+      await this.prisma.deviceValue.createMany({
         data: values,
         skipDuplicates: true,
       });

@@ -1,12 +1,8 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
-import {
-  EDatastreamDataType,
-  EDatastreamMode,
-  EDatastreamType,
-} from '@prisma/client';
+import { EDeviceDataType, EDeviceMode, EDeviceType } from '@prisma/client';
 
-export class DatastreamBasicDto {
+export class DeviceBasicDto {
   @ApiProperty({ example: 'd1e2d3d4-5f6g-7h8i-9j0k-1l2m3n4o5p6' })
   id: string;
 
@@ -22,8 +18,8 @@ export class DatastreamBasicDto {
   @ApiPropertyOptional()
   color?: string;
 
-  @ApiProperty({ enum: EDatastreamType })
-  type: EDatastreamType;
+  @ApiProperty({ enum: EDeviceType })
+  type: EDeviceType;
 
   @ApiProperty({ example: '00:11:22:33:44:55' })
   mac?: string;
@@ -31,11 +27,11 @@ export class DatastreamBasicDto {
   @ApiProperty({ example: 'D0' })
   pin?: string;
 
-  @ApiPropertyOptional({ enum: EDatastreamMode })
-  mode?: EDatastreamMode;
+  @ApiPropertyOptional({ enum: EDeviceMode })
+  mode?: EDeviceMode;
 
-  @ApiPropertyOptional({ enum: EDatastreamDataType })
-  dataType?: EDatastreamDataType;
+  @ApiPropertyOptional({ enum: EDeviceDataType })
+  dataType?: EDeviceDataType;
 
   @ApiPropertyOptional()
   minValue?: number;
@@ -53,7 +49,7 @@ export class DatastreamBasicDto {
   description?: string;
 }
 
-export class DatastreamValueDto {
+export class DeviceValueDto {
   @ApiProperty()
   value: string;
 
@@ -61,7 +57,7 @@ export class DatastreamValueDto {
   createdAt: Date;
 }
 
-export class DatastreamDetailDto extends DatastreamBasicDto {
+export class DeviceDetailDto extends DeviceBasicDto {
   @ApiProperty()
-  values: DatastreamValueDto[];
+  values: DeviceValueDto[];
 }

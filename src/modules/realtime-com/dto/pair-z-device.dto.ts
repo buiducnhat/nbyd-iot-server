@@ -1,8 +1,8 @@
 import { IsBoolean, IsEnum, IsOptional, IsString } from 'class-validator';
 
-import { ZDatastreamPin } from '@modules/datastreams/dto/z-datastream.enum';
+import { ZDevicePin } from '@modules/devices/dto/z-device.enum';
 
-export class PairZDatastreamDto {
+export class PairZDeviceDto {
   @IsString()
   projectId: string;
 
@@ -12,8 +12,8 @@ export class PairZDatastreamDto {
   @IsString()
   name: string;
 
-  @IsEnum(ZDatastreamPin)
-  pin: ZDatastreamPin;
+  @IsEnum(ZDevicePin)
+  pin: ZDevicePin;
 
   @IsOptional()
   @IsString()
@@ -23,7 +23,7 @@ export class PairZDatastreamDto {
   value: boolean;
 }
 
-export class PairZDatastreamResultDto {
+export class PairZDeviceResultDto {
   @IsString()
   mac: string;
 }

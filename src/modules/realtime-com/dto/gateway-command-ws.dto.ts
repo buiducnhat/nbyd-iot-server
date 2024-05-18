@@ -8,7 +8,7 @@ export class GatewayCommandWsDto {
   gatewayId: string;
 
   @IsString()
-  datastreamId: string;
+  deviceId: string;
 
   @IsString()
   value: string;

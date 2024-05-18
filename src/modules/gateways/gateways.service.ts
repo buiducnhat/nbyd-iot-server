@@ -7,7 +7,7 @@ import { CNotFoundException } from '@shared/custom-http-exception';
 import { prismaExclude } from '@shared/helpers/prisma.helper';
 
 import { CloudinaryService } from '@modules/cloudinary/cloudinary.service';
-import { DatastreamsService } from '@modules/datastreams/datastreams.service';
+import { DevicesService } from '@modules/devices/devices.service';
 import { ProjectsService } from '@modules/projects/projects.service';
 
 import { PrismaService } from '@src/prisma/prisma.service';
@@ -23,7 +23,7 @@ export class GatewaysService {
     private readonly prisma: PrismaService,
     @Inject(ProjectsService) private readonly projectsService: ProjectsService,
     private readonly cloudinary: CloudinaryService,
-    private readonly datastreamsService: DatastreamsService,
+    private readonly devicesService: DevicesService,
   ) {}
 
   async create(input: CreateGatewayDto, projectId: string, user: User) {
@@ -45,7 +45,7 @@ export class GatewaysService {
     return this.prisma.gateway.findFirst({
       select: {
         ...prismaExclude('Gateway', []),
-        datastreams: true,
+        devices: true,
       },
       where: {
         id,
@@ -64,7 +64,7 @@ export class GatewaysService {
         name: true,
         hardware: true,
         connection: true,
-        datastreams: true,
+        devices: true,
       },
       where: {
         authToken,
@@ -80,18 +80,15 @@ export class GatewaysService {
       throw new CNotFoundException('Gateway not found');
     }
 
-    const datastreams = await this.datastreamsService.getList(
-      projectId,
-      gateway.id,
-    );
-    const datastreamValues = await this.datastreamsService.getValues(
-      gateway.datastreams.map((x) => x.id),
+    const devices = await this.devicesService.getList(projectId, gateway.id);
+    const deviceValues = await this.devicesService.getValues(
+      gateway.devices.map((x) => x.id),
     );
 
     return {
       ...gateway,
-      datastreams: datastreams.map((x) => {
-        const lastValue = datastreamValues.get(x.id)?.[0];
+      devices: devices.map((x) => {
+        const lastValue = deviceValues.get(x.id)?.[0];
         return {
           ...x,
           lastValue,
