@@ -13,8 +13,8 @@ import redisConfig, { TRedisConfig } from '@configs/redis.config';
 
 import { AuthModule } from '@modules/auth/auth.module';
 import { CloudinaryModule } from '@modules/cloudinary/cloudinary.module';
-import { DevicesModule } from '@modules/devices/devices.module';
 import { FirebasesModule } from '@modules/firebase/firebase.module';
+import { GatewaysModule } from '@modules/gateways/gateways.module';
 import { ProjectsModule } from '@modules/projects/projects.module';
 import { UsersModule } from '@modules/users/users.module';
 
@@ -22,7 +22,7 @@ import { HealthsController } from '@src/healths/health.controller';
 import { PrismaModule } from '@src/prisma/prisma.module';
 
 import { TConfigs } from './configs';
-import { DatastreamsModule } from './modules/datastreams/datastreams.module';
+import { DevicesModule } from './modules/devices/devices.module';
 import { RealtimeComModule } from './modules/realtime-com/realtime-com.module';
 
 @Module({
@@ -46,8 +46,8 @@ import { RealtimeComModule } from './modules/realtime-com/realtime-com.module';
     AuthModule,
     UsersModule,
     ProjectsModule,
+    GatewaysModule,
     DevicesModule,
-    DatastreamsModule,
     RealtimeComModule,
     FirebasesModule,
   ],

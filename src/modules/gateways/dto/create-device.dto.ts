@@ -1,7 +1,10 @@
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+
 import { EDeviceDataType, EDeviceMode, EDeviceType } from '@prisma/client';
 import {
   IsBoolean,
   IsEnum,
+  IsHexColor,
   IsInt,
   IsNumber,
   IsOptional,
@@ -19,20 +22,24 @@ export class CreateDeviceDto {
   iconId?: number;
 
   @IsOptional()
-  @IsString()
+  @IsHexColor()
   color?: string;
 
-  @IsOptional()
-  @IsString()
-  pin?: string;
-
+  @ApiProperty({ enum: EDeviceType })
   @IsEnum(EDeviceType)
   type: EDeviceType;
 
   @IsOptional()
+  @IsString()
+  @MaxLength(10)
+  pin?: string;
+
+  @ApiPropertyOptional({ enum: EDeviceMode })
+  @IsOptional()
   @IsEnum(EDeviceMode)
   mode?: EDeviceMode;
 
+  @ApiPropertyOptional({ enum: EDeviceDataType })
   @IsOptional()
   @IsEnum(EDeviceDataType)
   dataType?: EDeviceDataType;

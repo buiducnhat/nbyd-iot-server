@@ -1,2 +1,0 @@
--- AlterTable
-ALTER TABLE "Datastream" ALTER COLUMN "pin" SET DATA TYPE VARCHAR(50);

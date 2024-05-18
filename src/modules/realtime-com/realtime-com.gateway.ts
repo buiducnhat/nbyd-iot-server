@@ -7,7 +7,7 @@ import {
   WebSocketServer,
 } from '@nestjs/websockets';
 
-import { Datastream, User } from '@prisma/client';
+import { Device, User } from '@prisma/client';
 import { Server, Socket } from 'socket.io';
 
 import { JwtAuthWsGuard } from '@modules/auth/guards/jwt-auth-ws.guard';
@@ -15,9 +15,9 @@ import { JwtAuthWsGuard } from '@modules/auth/guards/jwt-auth-ws.guard';
 import { CurrentUser } from '@src/decorators/current-user.decorator';
 import { PrismaService } from '@src/prisma/prisma.service';
 
-import { DeviceCommandWsDto } from './dto/device-command-ws.dto';
+import { GatewayCommandWsDto } from './dto/gateway-command-ws.dto';
 import { JoinWsRoomProjectDto } from './dto/join-ws-room-project.dto';
-import { PairZDatastreamDto } from './dto/pair-zdatastream.dto';
+import { PairZDeviceDto } from './dto/pair-z-device.dto';
 import { RealtimeComService } from './realtime-com.service';
 
 @WebSocketGateway({ cors: true })
@@ -64,43 +64,43 @@ export class RealtimeComGateway {
     socket.leave(`/projects/${input.projectId}`);
   }
 
-  @SubscribeMessage('/devices/command')
+  @SubscribeMessage('/gateways/command')
   @UseGuards(JwtAuthWsGuard)
-  async handleCommand(@MessageBody() input: DeviceCommandWsDto) {
-    return this.realtimeComService.handleDeviceCommandData(
+  async handleCommand(@MessageBody() input: GatewayCommandWsDto) {
+    return this.realtimeComService.handleGatewayCommandData(
       {
         projectId: input.projectId,
+        gatewayId: input.gatewayId,
         deviceId: input.deviceId,
-        datastreamId: input.datastreamId,
         value: input.value,
       },
       'WS',
     );
   }
 
-  @SubscribeMessage('/z-datastreams/pair')
+  @SubscribeMessage('/z-devices/pair')
   @UseGuards(JwtAuthWsGuard)
-  async handlePairZDatastream(
-    @MessageBody() input: PairZDatastreamDto,
+  async handlePairZDevice(
+    @MessageBody() input: PairZDeviceDto,
     @CurrentUser() user: User,
   ) {
-    return this.realtimeComService.handlePairZDatastream(input, user);
+    return this.realtimeComService.handlePairZDevice(input, user);
   }
 
-  async emitDeviceDataUpdate(
+  async emitGatewayDataUpdate(
     projectId: string,
+    gatewayId: string,
     deviceId: string,
-    datastreamId: string,
     value: string,
   ) {
-    this.server.to(`/projects/${projectId}`).emit('/devices/data', {
+    this.server.to(`/projects/${projectId}`).emit('/gateways/data', {
+      gatewayId,
       deviceId,
-      datastreamId,
       value,
     });
   }
 
-  async emitPairZDatastream(data: Datastream, userId: number) {
-    this.server.to(String(userId)).emit('/z-datastreams/pair-result', data);
+  async emitPairZDevice(data: Device, userId: number) {
+    this.server.to(String(userId)).emit('/z-devices/pair-result', data);
   }
 }

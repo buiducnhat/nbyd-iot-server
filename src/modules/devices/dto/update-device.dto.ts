@@ -1,6 +1,9 @@
+import { EDeviceDataType, EDeviceMode } from '@prisma/client';
 import {
-  IsNotEmpty,
-  IsObject,
+  IsBoolean,
+  IsEnum,
+  IsInt,
+  IsNumber,
   IsOptional,
   IsString,
   MaxLength,
@@ -9,17 +12,47 @@ import {
 export class UpdateDeviceDto {
   @IsOptional()
   @IsString()
-  @IsNotEmpty()
   @MaxLength(50)
   name?: string;
 
   @IsOptional()
-  @IsString()
-  @IsOptional()
-  @MaxLength(255)
-  description?: string;
+  @IsInt()
+  iconId?: number;
 
   @IsOptional()
-  @IsObject()
-  metadata: any;
+  @IsString()
+  color?: string;
+
+  @IsOptional()
+  @MaxLength(10)
+  pin?: string;
+
+  @IsOptional()
+  @IsEnum(EDeviceMode)
+  mode?: EDeviceMode;
+
+  @IsOptional()
+  @IsEnum(EDeviceDataType)
+  dataType?: EDeviceDataType;
+
+  @IsOptional()
+  @IsNumber()
+  minValue?: number;
+
+  @IsOptional()
+  @IsNumber()
+  maxValue?: number;
+
+  @IsOptional()
+  @IsString()
+  defaultValue?: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(50)
+  unit?: string;
+
+  @IsOptional()
+  @IsBoolean()
+  enabledHistory?: boolean;
 }

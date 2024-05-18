@@ -5,7 +5,7 @@ import * as firebase from 'firebase-admin';
 import { FIRESTORE_PROVIDER_TOKEN } from '@shared/constants/token.constant';
 
 type TTest = {
-  datastreamId: string;
+  deviceId: string;
   value: string;
   timestamp: Date;
 };
