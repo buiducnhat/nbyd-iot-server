@@ -9,8 +9,8 @@ import {
 
 import { IsPublic } from '@src/decorators/is-public.decorator';
 
-import { DeviceDataMqttDto } from './dto/device-data-mqtt.dto';
-import { DevicePingMqttDto } from './dto/device-status-mqtt.dto';
+import { GatewayDataMqttDto } from './dto/gateway-data-mqtt.dto';
+import { GatewayPingMqttDto } from './dto/gateway-status-mqtt.dto';
 import { PairZDatastreamResultDto } from './dto/pair-zdatastream.dto';
 import { RealtimeComService } from './realtime-com.service';
 
@@ -18,29 +18,29 @@ import { RealtimeComService } from './realtime-com.service';
 export class RealtimeComController {
   constructor(private readonly realtimeComService: RealtimeComService) {}
 
-  @EventPattern('/devices/+/status', Transport.MQTT)
+  @EventPattern('/gateways/+/status', Transport.MQTT)
   @IsPublic()
-  async handleDevicePing(
+  async handleGatewayPing(
     @Ctx() ctx: MqttContext,
-    @Payload() data: DevicePingMqttDto,
+    @Payload() data: GatewayPingMqttDto,
   ) {
-    const deviceId = ctx.getTopic().split('/')[4];
+    const gatewayId = ctx.getTopic().split('/')[4];
 
-    return this.realtimeComService.handleDeviceStatus(deviceId, data);
+    return this.realtimeComService.handleGatewayStatus(gatewayId, data);
   }
 
-  @EventPattern('/devices/+/data', Transport.MQTT)
+  @EventPattern('/gateways/+/data', Transport.MQTT)
   @IsPublic()
-  async handleDeviceData(
+  async handleGatewayData(
     @Ctx() ctx: MqttContext,
-    @Payload() data: DeviceDataMqttDto,
+    @Payload() data: GatewayDataMqttDto,
   ) {
-    const deviceId = ctx.getTopic().split('/')[2];
+    const gatewayId = ctx.getTopic().split('/')[2];
 
-    return this.realtimeComService.handleDeviceCommandData(
+    return this.realtimeComService.handleGatewayCommandData(
       {
         projectId: data.projectId,
-        deviceId,
+        gatewayId,
         datastreamId: data.datastreamId,
         value: data.value,
       },
@@ -48,29 +48,29 @@ export class RealtimeComController {
     );
   }
 
-  @EventPattern('/devices/+/z-datastreams/pair-result', Transport.MQTT)
+  @EventPattern('/gateways/+/z-datastreams/pair-result', Transport.MQTT)
   @IsPublic()
   async handlePairZDatastreamResult(
     @Ctx() ctx: MqttContext,
     @Payload() data: PairZDatastreamResultDto,
   ) {
-    const deviceId = ctx.getTopic().split('/')[2];
+    const gatewayId = ctx.getTopic().split('/')[2];
 
-    return this.realtimeComService.handlePairZDatastreamResult(deviceId, data);
+    return this.realtimeComService.handlePairZDatastreamResult(gatewayId, data);
   }
 
-  @EventPattern('/devices/+/z-datastreams/data', Transport.MQTT)
+  @EventPattern('/gateways/+/z-datastreams/data', Transport.MQTT)
   @IsPublic()
   async handleZDatastreamData(
     @Ctx() ctx: MqttContext,
-    @Payload() data: DeviceDataMqttDto,
+    @Payload() data: GatewayDataMqttDto,
   ) {
-    const deviceId = ctx.getTopic().split('/')[2];
+    const gatewayId = ctx.getTopic().split('/')[2];
 
-    return this.realtimeComService.handleZDeviceData(
+    return this.realtimeComService.handleZGatewayData(
       {
         projectId: data.projectId,
-        deviceId,
+        gatewayId,
         datastreamId: data.datastreamId,
         value: data.value,
       },

@@ -1,6 +1,6 @@
 import { IsString } from 'class-validator';
 
-export class DeviceDataMqttDto {
+export class GatewayDataMqttDto {
   @IsString()
   projectId: string;
 

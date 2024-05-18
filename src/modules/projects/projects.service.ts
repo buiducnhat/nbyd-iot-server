@@ -74,7 +74,7 @@ export class ProjectsService {
         ]),
         _count: {
           select: {
-            devices: true,
+            gateways: true,
           },
         },
       },
@@ -108,7 +108,7 @@ export class ProjectsService {
             },
           },
         },
-        devices: true,
+        gateways: true,
       },
       where: {
         id,

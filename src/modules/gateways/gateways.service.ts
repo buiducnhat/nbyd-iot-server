@@ -12,13 +12,13 @@ import { ProjectsService } from '@modules/projects/projects.service';
 
 import { PrismaService } from '@src/prisma/prisma.service';
 
-import { CreateDeviceDto } from './dto/create-device.dto';
-import { GetListDeviceDto } from './dto/get-list-device.dto';
+import { CreateGatewayDto } from './dto/create-gateway.dto';
+import { GetListGatewayDto } from './dto/get-list-gateway.dto';
 import { ReGenTokenDto } from './dto/re-gen-token.dto';
-import { UpdateDeviceDto } from './dto/update-device.dto';
+import { UpdateGatewayDto } from './dto/update-gateway.dto';
 
 @Injectable()
-export class DevicesService {
+export class GatewaysService {
   constructor(
     private readonly prisma: PrismaService,
     @Inject(ProjectsService) private readonly projectsService: ProjectsService,
@@ -26,8 +26,8 @@ export class DevicesService {
     private readonly datastreamsService: DatastreamsService,
   ) {}
 
-  async create(input: CreateDeviceDto, projectId: string, user: User) {
-    return this.prisma.device.create({
+  async create(input: CreateGatewayDto, projectId: string, user: User) {
+    return this.prisma.gateway.create({
       data: {
         ...input,
         authToken: uuid.v4(),
@@ -42,9 +42,9 @@ export class DevicesService {
   }
 
   async getDetail(id: string, projectId: string, user: User) {
-    return this.prisma.device.findFirst({
+    return this.prisma.gateway.findFirst({
       select: {
-        ...prismaExclude('Device', []),
+        ...prismaExclude('Gateway', []),
         datastreams: true,
       },
       where: {
@@ -58,7 +58,7 @@ export class DevicesService {
   }
 
   async getByAuthToken(authToken: string, projectId: string) {
-    const device = await this.prisma.device.findUnique({
+    const gateway = await this.prisma.gateway.findUnique({
       select: {
         id: true,
         name: true,
@@ -76,20 +76,20 @@ export class DevicesService {
       },
     });
 
-    if (!device) {
-      throw new CNotFoundException('Device not found');
+    if (!gateway) {
+      throw new CNotFoundException('Gateway not found');
     }
 
     const datastreams = await this.datastreamsService.getList(
       projectId,
-      device.id,
+      gateway.id,
     );
     const datastreamValues = await this.datastreamsService.getValues(
-      device.datastreams.map((x) => x.id),
+      gateway.datastreams.map((x) => x.id),
     );
 
     return {
-      ...device,
+      ...gateway,
       datastreams: datastreams.map((x) => {
         const lastValue = datastreamValues.get(x.id)?.[0];
         return {
@@ -100,8 +100,8 @@ export class DevicesService {
     };
   }
 
-  async getList(input: GetListDeviceDto, projectId: string, user: User) {
-    return this.prisma.device.findMany({
+  async getList(input: GetListGatewayDto, projectId: string, user: User) {
+    return this.prisma.gateway.findMany({
       where: {
         projectId,
         project: {
@@ -118,12 +118,12 @@ export class DevicesService {
   }
 
   async update(
-    input: UpdateDeviceDto,
+    input: UpdateGatewayDto,
     id: string,
     projectId: string,
     user: User,
   ) {
-    return this.prisma.device.update({
+    return this.prisma.gateway.update({
       where: {
         id,
         projectId,
@@ -136,7 +136,7 @@ export class DevicesService {
   }
 
   async delete(id: string, projectId: string, user: User) {
-    return this.prisma.device.delete({
+    return this.prisma.gateway.delete({
       where: {
         id,
         projectId,
@@ -158,7 +158,7 @@ export class DevicesService {
     projectId: string,
     user: User,
   ) {
-    return this.prisma.device.update({
+    return this.prisma.gateway.update({
       where: {
         id,
         projectId,
@@ -179,7 +179,7 @@ export class DevicesService {
     projectId: string,
     user: User,
   ) {
-    const device = await this.prisma.device.findUnique({
+    const gateway = await this.prisma.gateway.findUnique({
       where: {
         id,
         project: {
@@ -194,17 +194,17 @@ export class DevicesService {
       },
     });
 
-    if (!device) {
-      throw new CNotFoundException('Device not found');
+    if (!gateway) {
+      throw new CNotFoundException('Gateway not found');
     }
 
     const uploaded = await this.cloudinary.replaceFile(
-      device.imageFileId,
+      gateway.imageFileId,
       file,
-      'devices/images',
+      'gateways/images',
     );
 
-    return await this.prisma.device.update({
+    return await this.prisma.gateway.update({
       where: {
         id,
       },

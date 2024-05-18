@@ -1,11 +1,11 @@
 import { IsString } from 'class-validator';
 
-export class DeviceCommandWsDto {
+export class GatewayCommandWsDto {
   @IsString()
   projectId: string;
 
   @IsString()
-  deviceId: string;
+  gatewayId: string;
 
   @IsString()
   datastreamId: string;

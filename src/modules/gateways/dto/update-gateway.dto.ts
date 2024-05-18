@@ -6,7 +6,7 @@ import {
   MaxLength,
 } from 'class-validator';
 
-export class UpdateDeviceDto {
+export class UpdateGatewayDto {
   @IsOptional()
   @IsString()
   @IsNotEmpty()

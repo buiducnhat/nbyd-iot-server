@@ -10,7 +10,7 @@ import {
   IsString,
 } from 'class-validator';
 
-import { DeviceBasicDto } from '@modules/devices/dto/device.dto';
+import { GatewayBasicDto } from '@modules/gateways/dto/gateway.dto';
 
 export class ProjectBasicDto implements Partial<Project> {
   @IsInt()
@@ -46,7 +46,7 @@ export class ProjectBasicDto implements Partial<Project> {
 
   @ApiProperty()
   _count: {
-    devices: number;
+    gateways: number;
   };
 }
 
@@ -63,5 +63,5 @@ export class ProjectDetailDto extends ProjectBasicDto {
   @IsJSON()
   mobileDashboard: Prisma.JsonValue | null;
 
-  devices: DeviceBasicDto[];
+  gateways: GatewayBasicDto[];
 }

@@ -13,8 +13,8 @@ import redisConfig, { TRedisConfig } from '@configs/redis.config';
 
 import { AuthModule } from '@modules/auth/auth.module';
 import { CloudinaryModule } from '@modules/cloudinary/cloudinary.module';
-import { DevicesModule } from '@modules/devices/devices.module';
 import { FirebasesModule } from '@modules/firebase/firebase.module';
+import { GatewaysModule } from '@modules/gateways/gateways.module';
 import { ProjectsModule } from '@modules/projects/projects.module';
 import { UsersModule } from '@modules/users/users.module';
 
@@ -46,7 +46,7 @@ import { RealtimeComModule } from './modules/realtime-com/realtime-com.module';
     AuthModule,
     UsersModule,
     ProjectsModule,
-    DevicesModule,
+    GatewaysModule,
     DatastreamsModule,
     RealtimeComModule,
     FirebasesModule,

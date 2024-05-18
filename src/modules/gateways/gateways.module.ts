@@ -6,12 +6,12 @@ import { ProjectsModule } from '@modules/projects/projects.module';
 
 import { PrismaModule } from '@src/prisma/prisma.module';
 
-import { DevicesController } from './devices.controller';
-import { DevicesService } from './devices.service';
+import { GatewaysController } from './gateways.controller';
+import { GatewaysService } from './gateways.service';
 
 @Module({
   imports: [PrismaModule, ProjectsModule, CloudinaryModule, DatastreamsModule],
-  controllers: [DevicesController],
-  providers: [DevicesService],
+  controllers: [GatewaysController],
+  providers: [GatewaysService],
 })
-export class DevicesModule {}
+export class GatewaysModule {}

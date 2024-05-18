@@ -15,7 +15,7 @@ import { JwtAuthWsGuard } from '@modules/auth/guards/jwt-auth-ws.guard';
 import { CurrentUser } from '@src/decorators/current-user.decorator';
 import { PrismaService } from '@src/prisma/prisma.service';
 
-import { DeviceCommandWsDto } from './dto/device-command-ws.dto';
+import { GatewayCommandWsDto } from './dto/gateway-command-ws.dto';
 import { JoinWsRoomProjectDto } from './dto/join-ws-room-project.dto';
 import { PairZDatastreamDto } from './dto/pair-zdatastream.dto';
 import { RealtimeComService } from './realtime-com.service';
@@ -64,13 +64,13 @@ export class RealtimeComGateway {
     socket.leave(`/projects/${input.projectId}`);
   }
 
-  @SubscribeMessage('/devices/command')
+  @SubscribeMessage('/gateways/command')
   @UseGuards(JwtAuthWsGuard)
-  async handleCommand(@MessageBody() input: DeviceCommandWsDto) {
-    return this.realtimeComService.handleDeviceCommandData(
+  async handleCommand(@MessageBody() input: GatewayCommandWsDto) {
+    return this.realtimeComService.handleGatewayCommandData(
       {
         projectId: input.projectId,
-        deviceId: input.deviceId,
+        gatewayId: input.gatewayId,
         datastreamId: input.datastreamId,
         value: input.value,
       },
@@ -87,14 +87,14 @@ export class RealtimeComGateway {
     return this.realtimeComService.handlePairZDatastream(input, user);
   }
 
-  async emitDeviceDataUpdate(
+  async emitGatewayDataUpdate(
     projectId: string,
-    deviceId: string,
+    gatewayId: string,
     datastreamId: string,
     value: string,
   ) {
-    this.server.to(`/projects/${projectId}`).emit('/devices/data', {
-      deviceId,
+    this.server.to(`/projects/${projectId}`).emit('/gateways/data', {
+      gatewayId,
       datastreamId,
       value,
     });

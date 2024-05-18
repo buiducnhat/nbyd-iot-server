@@ -3,7 +3,7 @@ import { ClientMqtt } from '@nestjs/microservices';
 import { SchedulerRegistry } from '@nestjs/schedule';
 
 import { InjectRedis } from '@nestjs-modules/ioredis';
-import { EDeviceStatus, User } from '@prisma/client';
+import { EGatewayStatus, User } from '@prisma/client';
 import { Redis } from 'ioredis';
 import * as uuid from 'uuid';
 
@@ -18,7 +18,7 @@ import { AddValueDto } from '@modules/datastreams/dto/add-value.dto';
 
 import { PrismaService } from '@src/prisma/prisma.service';
 
-import { DevicePingMqttDto as DeviceStatusMqttDto } from './dto/device-status-mqtt.dto';
+import { GatewayPingMqttDto as GatewayStatusMqttDto } from './dto/gateway-status-mqtt.dto';
 import {
   PairZDatastreamDto,
   PairZDatastreamResultDto,
@@ -39,70 +39,70 @@ export class RealtimeComService {
     @InjectRedis() private readonly redis: Redis,
   ) {}
 
-  private async updateDeviceStatus(
-    deviceId: string,
-    status: EDeviceStatus,
-    data?: DeviceStatusMqttDto,
+  private async updateGatewayStatus(
+    gatewayId: string,
+    status: EGatewayStatus,
+    data?: GatewayStatusMqttDto,
   ) {
-    const device = await this.prisma.device.findUnique({
+    const gateway = await this.prisma.gateway.findUnique({
       select: {
         metaData: true,
       },
       where: {
-        id: deviceId,
+        id: gatewayId,
       },
     });
-    if (!device) {
+    if (!gateway) {
       return;
     }
 
-    if (!device.metaData) {
-      device.metaData = { ...data?.metaData };
+    if (!gateway.metaData) {
+      gateway.metaData = { ...data?.metaData };
     } else {
-      device.metaData = {
-        ...device.metaData,
+      gateway.metaData = {
+        ...gateway.metaData,
         ...data?.metaData,
       };
     }
 
-    return this.prisma.device.update({
+    return this.prisma.gateway.update({
       data: {
         status,
         lastOnline: status === 'ONLINE' ? new Date() : undefined,
-        metaData: device.metaData,
+        metaData: gateway.metaData,
       },
       where: {
-        id: deviceId,
+        id: gatewayId,
       },
     });
   }
 
-  async handleDeviceStatus(deviceId: string, data: DeviceStatusMqttDto) {
-    // Update the device status to online
-    await this.updateDeviceStatus(deviceId, EDeviceStatus.ONLINE, data);
+  async handleGatewayStatus(gatewayId: string, data: GatewayStatusMqttDto) {
+    // Update the gateway status to online
+    await this.updateGatewayStatus(gatewayId, EGatewayStatus.ONLINE, data);
 
     try {
-      // Set the device status to offline after time
-      this.schedulerRegistry.deleteTimeout(`/devices/${deviceId}/status`);
+      // Set the gateway status to offline after time
+      this.schedulerRegistry.deleteTimeout(`/gateways/${gatewayId}/status`);
     } catch (error) {}
 
     const timeout = setTimeout(async () => {
-      await this.updateDeviceStatus(deviceId, EDeviceStatus.OFFLINE);
+      await this.updateGatewayStatus(gatewayId, EGatewayStatus.OFFLINE);
     }, TIME_1_MINUTE);
-    this.schedulerRegistry.addTimeout(`/devices/${deviceId}/status`, timeout);
+    this.schedulerRegistry.addTimeout(`/gateways/${gatewayId}/status`, timeout);
   }
 
-  async handleDeviceCommandData(input: AddValueDto, from: 'MQTT' | 'WS') {
+  async handleGatewayCommandData(input: AddValueDto, from: 'MQTT' | 'WS') {
     if (from === 'MQTT') {
-      this.realtimeComGateway.emitDeviceDataUpdate(
+      this.realtimeComGateway.emitGatewayDataUpdate(
         input.projectId,
-        input.deviceId,
+        input.gatewayId,
         input.datastreamId,
         input.value,
       );
     } else {
       // Publish the command to the MQTT broker
-      this.mqtt.emit(`/devices/${input.deviceId}/command`, {
+      this.mqtt.emit(`/gateways/${input.gatewayId}/command`, {
         datastreamId: input.datastreamId,
         value: input.value,
       });
@@ -116,9 +116,9 @@ export class RealtimeComService {
 
     if (input.value) {
       // CASE: pair request
-      const device = await this.prisma.device.findUnique({
+      const gateway = await this.prisma.gateway.findUnique({
         where: {
-          id: input.deviceId,
+          id: input.gatewayId,
           project: {
             id: input.projectId,
             members: {
@@ -133,17 +133,17 @@ export class RealtimeComService {
         },
       });
 
-      if (!device) {
+      if (!gateway) {
         return;
       }
 
-      this.mqtt.emit(`/devices/${device.id}/z-datastreams/pair`, {
+      this.mqtt.emit(`/gateways/${gateway.id}/z-datastreams/pair`, {
         value: true,
         time: PAIR_Z_DATASTREAM_TIMEOUT,
         transaction,
       });
       await this.redis.set(
-        `/devices/${input.deviceId}/z-datastreams/pair/`,
+        `/gateways/${input.gatewayId}/z-datastreams/pair/`,
         JSON.stringify({
           ...input,
           userId: user.id,
@@ -153,8 +153,8 @@ export class RealtimeComService {
       );
     } else {
       // CASE: pair cancel
-      await this.redis.del(`/devices/${input.deviceId}/z-datastreams/pair/`);
-      this.mqtt.emit(`/devices/${input.deviceId}/z-datastreams/pair`, {
+      await this.redis.del(`/gateways/${input.gatewayId}/z-datastreams/pair/`);
+      this.mqtt.emit(`/gateways/${input.gatewayId}/z-datastreams/pair`, {
         value: false,
         time: PAIR_Z_DATASTREAM_TIMEOUT,
         transaction,
@@ -163,11 +163,11 @@ export class RealtimeComService {
   }
 
   async handlePairZDatastreamResult(
-    deviceId: string,
+    gatewayId: string,
     input: PairZDatastreamResultDto,
   ) {
     const cachedStr = await this.redis.get(
-      `/devices/${deviceId}/z-datastreams/pair/`,
+      `/gateways/${gatewayId}/z-datastreams/pair/`,
     );
     const cached = parseJson<PairZDatastreamDto & { userId: number }>(
       cachedStr,
@@ -185,9 +185,9 @@ export class RealtimeComService {
         type: 'ZIGBEE',
         pin: cached.pin.toString(),
         color: cached.color,
-        device: {
+        gateway: {
           connect: {
-            id: cached.deviceId,
+            id: cached.gatewayId,
           },
         },
       },
@@ -196,17 +196,17 @@ export class RealtimeComService {
     this.realtimeComGateway.emitPairZDatastream(datastream, cached.userId);
   }
 
-  async handleZDeviceData(input: AddValueDto, from: 'MQTT' | 'WS') {
+  async handleZGatewayData(input: AddValueDto, from: 'MQTT' | 'WS') {
     if (from === 'MQTT') {
-      this.realtimeComGateway.emitDeviceDataUpdate(
+      this.realtimeComGateway.emitGatewayDataUpdate(
         input.projectId,
-        input.deviceId,
+        input.gatewayId,
         input.datastreamId,
         input.value,
       );
     } else {
       // Publish the command to the MQTT broker
-      this.mqtt.emit(`/devices/${input.deviceId}/command`, {
+      this.mqtt.emit(`/gateways/${input.gatewayId}/command`, {
         datastreamId: input.datastreamId,
         value: input.value,
       });

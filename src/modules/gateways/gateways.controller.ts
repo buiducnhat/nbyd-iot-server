@@ -22,91 +22,91 @@ import { IsPublic } from '@src/decorators/is-public.decorator';
 import { JwtAuth } from '@src/decorators/jwt-auth.decorator';
 import { TransformResponseInterceptor } from '@src/interceptors/transform-response.interceptor';
 
-import { DevicesService } from './devices.service';
-import { CreateDeviceDto } from './dto/create-device.dto';
-import { DeviceBasicDto } from './dto/device.dto';
-import { GetListDeviceDto } from './dto/get-list-device.dto';
+import { CreateGatewayDto } from './dto/create-gateway.dto';
+import { GatewayBasicDto } from './dto/gateway.dto';
+import { GetListGatewayDto } from './dto/get-list-gateway.dto';
 import { ReGenTokenDto } from './dto/re-gen-token.dto';
-import { UpdateDeviceDto } from './dto/update-device.dto';
+import { UpdateGatewayDto } from './dto/update-gateway.dto';
+import { GatewaysService } from './gateways.service';
 
-@Controller('projects/:projectId/devices')
-@ApiTags('Devices')
+@Controller('projects/:projectId/gateways')
+@ApiTags('Gateways')
 @ApiBearerAuth()
 @JwtAuth()
 @UseInterceptors(TransformResponseInterceptor)
-export class DevicesController {
-  constructor(private readonly deviceService: DevicesService) {}
+export class GatewaysController {
+  constructor(private readonly gatewayService: GatewaysService) {}
 
   @Post()
-  @ApiResponse(DeviceBasicDto)
+  @ApiResponse(GatewayBasicDto)
   async create(
     @Param('projectId') projectId: string,
-    @Body() input: CreateDeviceDto,
+    @Body() input: CreateGatewayDto,
     @CurrentUser() user: User,
   ) {
-    return this.deviceService.create(input, projectId, user);
+    return this.gatewayService.create(input, projectId, user);
   }
 
   @Get()
-  @ApiArrayResponse(DeviceBasicDto)
+  @ApiArrayResponse(GatewayBasicDto)
   async getList(
     @Param('projectId') projectId: string,
-    @Query() query: GetListDeviceDto,
+    @Query() query: GetListGatewayDto,
     @CurrentUser() user: User,
   ) {
-    return this.deviceService.getList(query, projectId, user);
+    return this.gatewayService.getList(query, projectId, user);
   }
 
   @Get('/:id')
-  @ApiResponse(DeviceBasicDto)
+  @ApiResponse(GatewayBasicDto)
   async getDetail(
     @Param('projectId') projectId: string,
     @Param('id') id: string,
     @CurrentUser() user: User,
   ) {
-    return this.deviceService.getDetail(id, projectId, user);
+    return this.gatewayService.getDetail(id, projectId, user);
   }
 
   @Get('/auth-token/:authToken')
   @IsPublic()
-  @ApiResponse(DeviceBasicDto)
+  @ApiResponse(GatewayBasicDto)
   async getByAuthToken(
     @Param('projectId') projectId: string,
     @Param('authToken') authToken: string,
   ) {
-    return this.deviceService.getByAuthToken(authToken, projectId);
+    return this.gatewayService.getByAuthToken(authToken, projectId);
   }
 
   @Patch('/:id')
-  @ApiResponse(DeviceBasicDto)
+  @ApiResponse(GatewayBasicDto)
   async update(
     @Param('projectId') projectId: string,
     @Param('id') id: string,
-    @Body() input: UpdateDeviceDto,
+    @Body() input: UpdateGatewayDto,
     @CurrentUser() user: User,
   ) {
-    return this.deviceService.update(input, id, projectId, user);
+    return this.gatewayService.update(input, id, projectId, user);
   }
 
   @Delete('/:id')
-  @ApiResponse(DeviceBasicDto)
+  @ApiResponse(GatewayBasicDto)
   async delete(
     @Param('projectId') projectId: string,
     @Param('id') id: string,
     @CurrentUser() user: User,
   ) {
-    return this.deviceService.delete(id, projectId, user);
+    return this.gatewayService.delete(id, projectId, user);
   }
 
   @Post('/:id/re-gen-token')
-  @ApiResponse(DeviceBasicDto)
+  @ApiResponse(GatewayBasicDto)
   async reGenToken(
     @Param('projectId') projectId: string,
     @Param('id') id: string,
     @Body() input: ReGenTokenDto,
     @CurrentUser() user: User,
   ) {
-    return this.deviceService.reGenAuthToken(input, id, projectId, user);
+    return this.gatewayService.reGenAuthToken(input, id, projectId, user);
   }
 
   @Patch('/:id/images')
@@ -122,7 +122,7 @@ export class DevicesController {
       },
     },
   })
-  @ApiResponse(DeviceBasicDto)
+  @ApiResponse(GatewayBasicDto)
   @UseInterceptors(FileInterceptor('file'))
   async uploadImage(
     @CurrentUser() user: User,
@@ -130,6 +130,6 @@ export class DevicesController {
     @Param('id') id: string,
     @UploadedFile() file: Express.Multer.File,
   ) {
-    return this.deviceService.uploadImage(file, id, projectId, user);
+    return this.gatewayService.uploadImage(file, id, projectId, user);
   }
 }

@@ -11,7 +11,7 @@ export class DatastreamBasicDto {
   id: string;
 
   @ApiProperty({ example: 'd1e2d3d4-5f6g-7h8i-9j0k-1l2m3n4o5p6' })
-  deviceId: string;
+  gatewayId: string;
 
   @ApiProperty()
   name: string;

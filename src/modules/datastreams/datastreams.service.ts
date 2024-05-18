@@ -26,16 +26,16 @@ export class DatastreamsService {
 
   async create(
     input: CreateDatastreamDto,
-    deviceId: string,
+    gatewayId: string,
     projectId: string,
     user: User,
   ) {
     return this.prisma.datastream.create({
       data: {
         ...input,
-        device: {
+        gateway: {
           connect: {
-            id: deviceId,
+            id: gatewayId,
             project: {
               id: projectId,
               ...this.projectsService.editorWhereFilter(user),
@@ -49,15 +49,15 @@ export class DatastreamsService {
   async update(
     input: UpdateDatastreamDto,
     id: string,
-    deviceId: string,
+    gatewayId: string,
     projectId: string,
     user: User,
   ) {
     return this.prisma.datastream.update({
       where: {
         id: id,
-        deviceId: deviceId,
-        device: {
+        gatewayId: gatewayId,
+        gateway: {
           project: {
             id: projectId,
             ...this.projectsService.editorWhereFilter(user),
@@ -68,12 +68,12 @@ export class DatastreamsService {
     });
   }
 
-  async delete(id: string, deviceId: string, projectId: string, user: User) {
+  async delete(id: string, gatewayId: string, projectId: string, user: User) {
     return this.prisma.datastream.delete({
       where: {
         id: id,
-        deviceId: deviceId,
-        device: {
+        gatewayId: gatewayId,
+        gateway: {
           project: {
             id: projectId,
             ...this.projectsService.editorWhereFilter(user),
@@ -85,7 +85,7 @@ export class DatastreamsService {
 
   async deleteMany(
     input: DeleteManyDatastreamsDto,
-    deviceId: string,
+    gatewayId: string,
     projectId: string,
     user: User,
   ) {
@@ -94,8 +94,8 @@ export class DatastreamsService {
         id: {
           in: input.ids,
         },
-        deviceId,
-        device: {
+        gatewayId,
+        gateway: {
           project: {
             id: projectId,
             ...this.projectsService.editorWhereFilter(user),
@@ -107,14 +107,14 @@ export class DatastreamsService {
 
   async getList(
     projectId?: string,
-    deviceId?: string,
+    gatewayId?: string,
     user?: User,
     needValues?: boolean,
   ) {
     const datastreams = await this.prisma.datastream.findMany({
       where: {
-        device: {
-          id: deviceId ? deviceId : undefined,
+        gateway: {
+          id: gatewayId ? gatewayId : undefined,
           project: user
             ? {
                 id: projectId,

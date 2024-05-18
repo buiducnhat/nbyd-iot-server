@@ -1,4 +1,4 @@
-export class DevicePingMqttDto {
+export class GatewayPingMqttDto {
   metaData: {
     ipAddress: string;
     macAddress: string;

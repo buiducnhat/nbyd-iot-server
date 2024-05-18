@@ -7,7 +7,7 @@ export class PairZDatastreamDto {
   projectId: string;
 
   @IsString()
-  deviceId: string;
+  gatewayId: string;
 
   @IsString()
   name: string;

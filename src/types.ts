@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-namespace */
 declare global {
   namespace PrismaJson {
-    type TDeviceMetaData = {
+    type TGatewayMetaData = {
       ipAddress: string;
       macAddress: string;
     };

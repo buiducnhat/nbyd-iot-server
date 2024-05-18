@@ -107,7 +107,7 @@ model Project {
   webDashboard    Json?
   mobileDashboard Json?
   members         ProjectMember[]
-  devices         Device[]
+  gateways         Gateway[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -129,23 +129,23 @@ model ProjectMember {
   @@id([projectId, userId])
 }
 
-enum EDeviceStatus {
+enum EGatewayStatus {
   ONLINE
   OFFLINE
 }
 
-enum EDeviceHardware {
+enum EGatewayHardware {
   ESP8266
   ESP32
   RASPBERRY_PI
 }
 
-enum EDeviceConnection {
+enum EGatewayConnection {
   WIFI
   ETHERNET
 }
 
-model Device {
+model Gateway {
   id              String            @id @default(uuid())
   projectId       String
   project         Project           @relation(fields: [projectId], references: [id])
@@ -155,10 +155,10 @@ model Device {
   authTokenExpiry DateTime?
   imageFileId     String?
   imageFileUrl    String?
-  status          EDeviceStatus     @default(OFFLINE)
-  hardware        EDeviceHardware
-  connection      EDeviceConnection
-  /// [TDeviceMetaData]
+  status          EGatewayStatus     @default(OFFLINE)
+  hardware        EGatewayHardware
+  connection      EGatewayConnection
+  /// [TGatewayMetaData]
   metaData        Json?
   lastOnline      DateTime?
   datastreams     Datastream[]
@@ -190,8 +190,8 @@ enum EDatastreamDataType {
 
 model Datastream {
   id             String               @id @default(uuid())
-  deviceId       String
-  device         Device               @relation(fields: [deviceId], references: [id])
+  gatewayId       String
+  gateway         Gateway               @relation(fields: [gatewayId], references: [id])
   name           String               @db.VarChar(50)
   iconId         Int?
   color          String?              @db.VarChar(20)
@@ -210,7 +210,7 @@ model Datastream {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@index([deviceId])
+  @@index([gatewayId])
 }
 
 enum EAppType {
