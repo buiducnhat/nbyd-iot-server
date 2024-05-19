@@ -8,7 +8,7 @@ import { Redis } from 'ioredis';
 import * as uuid from 'uuid';
 
 import {
-  PAIR_Z_DATASTREAM_TIMEOUT,
+  PAIR_Z_DEVICE_TIMEOUT,
   TIME_1_MINUTE,
 } from '@shared/constants/time.constant';
 import { parseJson } from '@shared/helpers/parse-json.helper';
@@ -136,7 +136,7 @@ export class RealtimeComService {
 
       this.mqtt.emit(`/gateways/${gateway.id}/z-devices/pair`, {
         value: true,
-        time: PAIR_Z_DATASTREAM_TIMEOUT,
+        time: PAIR_Z_DEVICE_TIMEOUT,
         transaction,
       });
       await this.redis.set(
@@ -146,14 +146,14 @@ export class RealtimeComService {
           userId: user.id,
         }),
         'EX',
-        PAIR_Z_DATASTREAM_TIMEOUT,
+        PAIR_Z_DEVICE_TIMEOUT,
       );
     } else {
       // CASE: pair cancel
       await this.redis.del(`/gateways/${input.gatewayId}/z-devices/pair/`);
       this.mqtt.emit(`/gateways/${input.gatewayId}/z-devices/pair`, {
         value: false,
-        time: PAIR_Z_DATASTREAM_TIMEOUT,
+        time: PAIR_Z_DEVICE_TIMEOUT,
         transaction,
       });
     }
