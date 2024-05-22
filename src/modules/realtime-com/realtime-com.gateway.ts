@@ -2,6 +2,7 @@ import { Inject, Logger, UseGuards, forwardRef } from '@nestjs/common';
 import {
   ConnectedSocket,
   MessageBody,
+  OnGatewayConnection,
   SubscribeMessage,
   WebSocketGateway,
   WebSocketServer,
@@ -21,7 +22,7 @@ import { PairZDeviceDto } from './dto/pair-z-device.dto';
 import { RealtimeComService } from './realtime-com.service';
 
 @WebSocketGateway({ cors: true })
-export class RealtimeComGateway {
+export class RealtimeComGateway implements OnGatewayConnection {
   @WebSocketServer()
   private readonly server: Server;
   private readonly logger = new Logger(RealtimeComGateway.name);
@@ -31,6 +32,10 @@ export class RealtimeComGateway {
     @Inject(forwardRef(() => RealtimeComService))
     private readonly realtimeComService: RealtimeComService,
   ) {}
+
+  handleConnection(client: Socket) {
+    client.join(String(client.handshake.auth.userId));
+  }
 
   @SubscribeMessage('/ws-room/projects/join')
   @UseGuards(JwtAuthWsGuard)
@@ -64,10 +69,10 @@ export class RealtimeComGateway {
     socket.leave(`/projects/${input.projectId}`);
   }
 
-  @SubscribeMessage('/gateways/command')
+  @SubscribeMessage('/devices/command')
   @UseGuards(JwtAuthWsGuard)
   async handleCommand(@MessageBody() input: GatewayCommandWsDto) {
-    return this.realtimeComService.handleGatewayCommandData(
+    return this.realtimeComService.handleGatewayCommandOrData(
       {
         projectId: input.projectId,
         gatewayId: input.gatewayId,
@@ -93,7 +98,7 @@ export class RealtimeComGateway {
     deviceId: string,
     value: string,
   ) {
-    this.server.to(`/projects/${projectId}`).emit('/gateways/data', {
+    this.server.to(`/projects/${projectId}`).emit('/devices/data', {
       gatewayId,
       deviceId,
       value,

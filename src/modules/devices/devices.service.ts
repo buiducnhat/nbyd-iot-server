@@ -2,12 +2,13 @@ import { Inject, Injectable } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 
 import { InjectRedis } from '@nestjs-modules/ioredis';
-import { DeviceValue, User } from '@prisma/client';
+import { Device, DeviceValue, User } from '@prisma/client';
 import Redis from 'ioredis';
 
 import { parseJson } from '@shared/helpers/parse-json.helper';
 
 import { ProjectsService } from '@modules/projects/projects.service';
+import { RealtimeComService } from '@modules/realtime-com/realtime-com.service';
 
 import { PrismaService } from '@src/prisma/prisma.service';
 
@@ -21,6 +22,8 @@ export class DevicesService {
   constructor(
     private readonly prisma: PrismaService,
     @Inject(ProjectsService) private readonly projectsService: ProjectsService,
+    @Inject(RealtimeComService)
+    private readonly realtimeComService: RealtimeComService,
     @InjectRedis() private readonly redis: Redis,
   ) {}
 
@@ -30,9 +33,10 @@ export class DevicesService {
     projectId: string,
     user: User,
   ) {
-    return this.prisma.device.create({
+    const result = await this.prisma.device.create({
       data: {
         ...input,
+        dataType: input.dataType || input.type === 'ZIGBEE' ? 'JSON' : 'STRING',
         gateway: {
           connect: {
             id: gatewayId,
@@ -44,6 +48,10 @@ export class DevicesService {
         },
       },
     });
+
+    this.realtimeComService.requestGatewayRefetch(gatewayId);
+
+    return result;
   }
 
   async update(
@@ -53,7 +61,7 @@ export class DevicesService {
     projectId: string,
     user: User,
   ) {
-    return this.prisma.device.update({
+    const result = await this.prisma.device.update({
       where: {
         id: id,
         gatewayId: gatewayId,
@@ -66,10 +74,18 @@ export class DevicesService {
       },
       data: input,
     });
+
+    // Request gateway refetch to update the device list
+    this.realtimeComService.requestGatewayRefetch(gatewayId);
+
+    // Update the cache
+    this.redis.del(`/devices/${id}`);
+
+    return result;
   }
 
   async delete(id: string, gatewayId: string, projectId: string, user: User) {
-    return this.prisma.device.delete({
+    const device = await this.prisma.device.delete({
       where: {
         id: id,
         gatewayId: gatewayId,
@@ -81,6 +97,19 @@ export class DevicesService {
         },
       },
     });
+
+    // Remove the device from z2m
+    if (device.type === 'ZIGBEE') {
+      this.realtimeComService.removeZDevice(device.id, gatewayId);
+    }
+
+    // Request gateway refetch to update the device list
+    this.realtimeComService.requestGatewayRefetch(gatewayId);
+
+    // Update the cache
+    this.redis.del(`/devices/${id}`);
+
+    return device;
   }
 
   async deleteMany(
@@ -89,7 +118,7 @@ export class DevicesService {
     projectId: string,
     user: User,
   ) {
-    return this.prisma.device.deleteMany({
+    const result = await this.prisma.device.deleteMany({
       where: {
         id: {
           in: input.ids,
@@ -103,6 +132,10 @@ export class DevicesService {
         },
       },
     });
+
+    this.realtimeComService.requestGatewayRefetch(gatewayId);
+
+    return result;
   }
 
   async getList(
@@ -182,67 +215,67 @@ export class DevicesService {
   }
 
   async addValue({ deviceId, value }: AddValueDto) {
-    const cachedDVsString = await this.redis.get(`/devices/${deviceId}/values`);
-    let cachedDVs = parseJson<DeviceValue[]>(cachedDVsString, null);
-
-    const device = await this.prisma.device.findUnique({
-      where: { id: deviceId },
-      select: {
-        id: true,
-        values: !cachedDVs ? true : false,
-      },
-    });
-
+    //#region Get device {id, enabledHistory} from the cache
+    const cachedDeviceStr = await this.redis.get(`/devices/${deviceId}`);
+    let device = parseJson<Partial<Device>>(cachedDeviceStr, null);
     if (!device) {
-      return;
+      device = await this.prisma.device.findUnique({
+        where: { id: deviceId },
+        select: {
+          id: true,
+          enabledHistory: true,
+        },
+      });
+      await this.redis.set(`/devices/${deviceId}`, JSON.stringify(device));
     }
+    //#endregion
 
-    if (cachedDVs) {
-      cachedDVs.unshift({
+    //#region Get cached values and add new value based on the device's enabledHistory
+    const cachedValuesStr = await this.redis.get(`/devices/${deviceId}/values`);
+    let cachedValues = parseJson<DeviceValue[]>(cachedValuesStr, []) || [];
+    if (device.enabledHistory) {
+      cachedValues.unshift({
         deviceId,
         value,
         createdAt: new Date(),
       });
-      device.values = cachedDVs;
     } else {
-      if (!device.values) {
-        device.values = [];
-      }
-      device.values.unshift({
-        deviceId,
-        value,
-        createdAt: new Date(),
-      });
-      cachedDVs = device.values;
+      cachedValues = [
+        {
+          deviceId,
+          value,
+          createdAt: new Date(),
+        },
+      ];
     }
 
+    // Set the new cached values
     await this.redis.set(
       `/devices/${deviceId}/values`,
-      JSON.stringify(cachedDVs),
+      JSON.stringify(cachedValues),
     );
-
-    return device;
+    //#endregion
   }
 
-  @Cron(CronExpression.EVERY_5_MINUTES)
-  async syncCachedDVsToDb() {
+  @Cron(CronExpression.EVERY_HOUR)
+  async syncCachedValuesToDb() {
+    //#region Get all cached values
     const cachedKeys = await this.redis.keys('/devices/*/values');
-    const cachedDVs = await Promise.all(
+    const cachedAllValues = await Promise.all(
       cachedKeys.map(async (key) => {
-        const cachedDVsString = await this.redis.get(key);
-        const parsed = parseJson<DeviceValue[]>(cachedDVsString, []).map(
-          (x) => {
-            if (typeof x.value !== 'string') {
-              x.value = JSON.stringify(x.value);
-            }
-            return x;
-          },
-        );
+        const cachedValues = await this.redis.get(key);
+        const parsed = parseJson<DeviceValue[]>(cachedValues, []).map((x) => {
+          if (typeof x.value !== 'string') {
+            x.value = JSON.stringify(x.value);
+          }
+          return x;
+        });
         return parsed;
       }),
     );
+    //#endregion
 
-    const values = cachedDVs.flat();
+    const values = cachedAllValues.flat();
     if (values.length) {
       await this.prisma.deviceValue.createMany({
         data: values,

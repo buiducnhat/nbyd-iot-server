@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 
@@ -41,9 +41,10 @@ import { RealtimeComService } from './realtime-com.service';
     PrismaModule,
     AuthModule,
     FirebasesModule,
-    DevicesModule,
+    forwardRef(() => DevicesModule),
   ],
   controllers: [RealtimeComController],
   providers: [RealtimeComGateway, RealtimeComService],
+  exports: [RealtimeComService],
 })
 export class RealtimeComModule {}

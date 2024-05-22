@@ -8,5 +8,6 @@
     "metatype",
     "NBYD",
     "websockets"
-  ]
+  ],
+  "vsicons.presets.nestjs": true
 }

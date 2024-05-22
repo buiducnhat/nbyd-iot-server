@@ -249,7 +249,7 @@ model Notification {
 
 model DeviceValue {
   deviceId  String
-  device    Device   @relation(fields: [deviceId], references: [id])
+  device    Device   @relation(fields: [deviceId], references: [id], onDelete: Cascade)
   value     String
   createdAt DateTime @default(now())
 

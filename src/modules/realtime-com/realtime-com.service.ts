@@ -5,7 +5,6 @@ import { SchedulerRegistry } from '@nestjs/schedule';
 import { InjectRedis } from '@nestjs-modules/ioredis';
 import { EGatewayStatus, User } from '@prisma/client';
 import { Redis } from 'ioredis';
-import * as uuid from 'uuid';
 
 import {
   PAIR_Z_DEVICE_TIMEOUT,
@@ -32,6 +31,7 @@ export class RealtimeComService {
     private readonly realtimeComGateway: RealtimeComGateway,
     private readonly schedulerRegistry: SchedulerRegistry,
     @Inject('MQTT_CLIENT') private readonly mqtt: ClientMqtt,
+    @Inject(forwardRef(() => DevicesService))
     private readonly devicesService: DevicesService,
     @InjectRedis() private readonly redis: Redis,
   ) {}
@@ -89,7 +89,8 @@ export class RealtimeComService {
     this.schedulerRegistry.addTimeout(`/gateways/${gatewayId}/status`, timeout);
   }
 
-  async handleGatewayCommandData(input: AddValueDto, from: 'MQTT' | 'WS') {
+  async handleGatewayCommandOrData(input: AddValueDto, from: 'MQTT' | 'WS') {
+    // CASE: handle the gateway data (sent from the gateway)
     if (from === 'MQTT') {
       this.realtimeComGateway.emitGatewayDataUpdate(
         input.projectId,
@@ -97,20 +98,19 @@ export class RealtimeComService {
         input.deviceId,
         input.value,
       );
-    } else {
-      // Publish the command to the MQTT broker
-      this.mqtt.emit(`/gateways/${input.gatewayId}/command`, {
+
+      return this.devicesService.addValue(input);
+    }
+    // CASE: handle the gateway command (sent from the user client)
+    else if (from === 'WS') {
+      this.mqtt.emit(`/gateways/${input.gatewayId}/devices/command`, {
         deviceId: input.deviceId,
         value: input.value,
       });
     }
-
-    return this.devicesService.addValue(input);
   }
 
   async handlePairZDevice(input: PairZDeviceDto, user: User) {
-    const transaction = uuid.v4();
-
     if (input.value) {
       // CASE: pair request
       const gateway = await this.prisma.gateway.findUnique({
@@ -137,7 +137,6 @@ export class RealtimeComService {
       this.mqtt.emit(`/gateways/${gateway.id}/z-devices/pair`, {
         value: true,
         time: PAIR_Z_DEVICE_TIMEOUT,
-        transaction,
       });
       await this.redis.set(
         `/gateways/${input.gatewayId}/z-devices/pair/`,
@@ -154,9 +153,15 @@ export class RealtimeComService {
       this.mqtt.emit(`/gateways/${input.gatewayId}/z-devices/pair`, {
         value: false,
         time: PAIR_Z_DEVICE_TIMEOUT,
-        transaction,
       });
     }
+  }
+
+  async cancelPairZDevice(gatewayId) {
+    this.mqtt.emit(`/gateways/${gatewayId}/z-devices/pair`, {
+      value: false,
+    });
+    await this.redis.del(`/gateways/${gatewayId}/z-devices/pair/`);
   }
 
   async handlePairZDeviceResult(
@@ -190,25 +195,20 @@ export class RealtimeComService {
       },
     });
 
+    await this.cancelPairZDevice(gatewayId);
+
+    await this.requestGatewayRefetch(gatewayId);
+
     this.realtimeComGateway.emitPairZDevice(device, cached.userId);
   }
 
-  async handleZGatewayData(input: AddValueDto, from: 'MQTT' | 'WS') {
-    if (from === 'MQTT') {
-      this.realtimeComGateway.emitGatewayDataUpdate(
-        input.projectId,
-        input.gatewayId,
-        input.deviceId,
-        input.value,
-      );
-    } else {
-      // Publish the command to the MQTT broker
-      this.mqtt.emit(`/gateways/${input.gatewayId}/command`, {
-        deviceId: input.deviceId,
-        value: input.value,
-      });
-    }
+  async requestGatewayRefetch(gatewayId: string) {
+    this.mqtt.emit(`/gateways/${gatewayId}/refetch`, {});
+  }
 
-    // return this.devicesService.addValue(input);
+  async removeZDevice(deviceId: string, gatewayId: string) {
+    this.mqtt.emit(`/gateways/${gatewayId}/z-devices/remove`, {
+      deviceId,
+    });
   }
 }
