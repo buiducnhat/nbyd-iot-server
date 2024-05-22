@@ -40,6 +40,12 @@ import { UsersService } from './users.service';
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
+  @Patch('me')
+  @ApiResponse(UserBasicDto)
+  async updateMe(@CurrentUser() user: User, @Body() input: UpdateUserDto) {
+    return this.usersService.updateMe(user, input);
+  }
+
   @Get('admin-paginated')
   @ApiPaginatedResponse(UserBasicDto)
   async adminPaginated(@Query() query: AdminGetUsersDto) {

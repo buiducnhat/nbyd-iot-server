@@ -14,7 +14,7 @@ async function main() {
       userLogin: {
         create: {
           username: 'admin',
-          email: 'nhaths4701@gmail.com',
+          email: 'admin@email.com',
           password: password,
           isEmailVerified: true,
         },

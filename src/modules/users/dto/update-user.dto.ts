@@ -1,5 +1,7 @@
-import { EGender } from '@prisma/client';
-import { IsDateString, IsOptional, IsString } from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
+
+import { EGender, ERole } from '@prisma/client';
+import { IsDateString, IsEnum, IsOptional, IsString } from 'class-validator';
 
 export class UpdateUserDto {
   @IsString()
@@ -11,9 +13,16 @@ export class UpdateUserDto {
   lastName?: string;
 
   @IsOptional()
-  @IsString()
+  @IsEnum(EGender)
+  @ApiProperty({ enum: EGender })
   gender?: EGender;
 
+  @IsOptional()
   @IsDateString()
   dateOfBirth?: string;
+
+  @IsOptional()
+  @IsEnum(ERole)
+  @ApiProperty({ enum: ERole })
+  role?: ERole;
 }

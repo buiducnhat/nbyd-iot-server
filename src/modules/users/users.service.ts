@@ -159,4 +159,18 @@ export class UsersService {
       },
     });
   }
+
+  public async updateMe(user: User, input: UpdateUserDto) {
+    return await this.prisma.user.update({
+      where: {
+        id: user.id,
+      },
+      data: input,
+      include: {
+        externals: true,
+        sessions: true,
+        userLogin: true,
+      },
+    });
+  }
 }
