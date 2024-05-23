@@ -15,15 +15,22 @@ import { ApiBearerAuth, ApiBody, ApiConsumes, ApiTags } from '@nestjs/swagger';
 
 import { User } from '@prisma/client';
 
-import { ApiArrayResponse, ApiResponse } from '@shared/response';
+import {
+  ApiArrayResponse,
+  ApiPaginatedResponse,
+  ApiResponse,
+} from '@shared/response';
 
 import { DevicesService } from '@modules/devices/devices.service';
 import { DeviceDetailDto } from '@modules/devices/dto/device.dto';
 
 import { CurrentUser } from '@src/decorators/current-user.decorator';
 import { JwtAuth } from '@src/decorators/jwt-auth.decorator';
+import { RolesAuth } from '@src/decorators/roles-auth.decorator';
 import { TransformResponseInterceptor } from '@src/interceptors/transform-response.interceptor';
 
+import { AdminDeleteManyProjectsDto } from './dto/admin-delete-project.dto';
+import { AdminGetListProjectDto } from './dto/admin-get-list-project.dto';
 import { CreateProjectDto } from './dto/create-project.dto';
 import { GetListDeviceDto } from './dto/get-list-device.dto';
 import { GetListProjectDto } from './dto/get-list-project.dto';
@@ -118,5 +125,26 @@ export class ProjectsController {
     @CurrentUser() user: User,
   ) {
     return this.devicesService.getList(id, undefined, user, input.needValues);
+  }
+
+  @Get('/admin/list')
+  @ApiPaginatedResponse(ProjectBasicDto)
+  @RolesAuth(['ADMIN'])
+  async adminGetList(@Query() input: AdminGetListProjectDto) {
+    return this.projectsService.adminGetList(input);
+  }
+
+  @Delete('/admin/delete/:id')
+  @RolesAuth(['ADMIN'])
+  @ApiResponse(ProjectBasicDto)
+  async adminDelete(@Param('id') id: string) {
+    return this.projectsService.adminDeleteProject(id);
+  }
+
+  @Delete('/admin/delete-many')
+  @RolesAuth(['ADMIN'])
+  @ApiResponse(ProjectBasicDto)
+  async adminDeleteMany(@Body() input: AdminDeleteManyProjectsDto) {
+    return this.projectsService.adminDeleteManyProjects(input.ids);
   }
 }

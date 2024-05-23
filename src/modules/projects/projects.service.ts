@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 
-import { User } from '@prisma/client';
+import { Prisma, User } from '@prisma/client';
 
 import { CNotFoundException } from '@shared/custom-http-exception';
 import { prismaExclude } from '@shared/helpers/prisma.helper';
@@ -9,6 +9,7 @@ import { CloudinaryService } from '@modules/cloudinary/cloudinary.service';
 
 import { PrismaService } from '@src/prisma/prisma.service';
 
+import { AdminGetListProjectDto } from './dto/admin-get-list-project.dto';
 import { CreateProjectDto } from './dto/create-project.dto';
 import { GetListProjectDto } from './dto/get-list-project.dto';
 import { UpdateProjectDto } from './dto/update-project.dto';
@@ -192,4 +193,90 @@ export class ProjectsService {
       },
     });
   }
+
+  //#region Admin
+
+  public async adminGetList(input: AdminGetListProjectDto) {
+    const where: Prisma.ProjectWhereInput = {
+      OR: input.search
+        ? [{ name: { contains: input.search, mode: 'insensitive' } }]
+        : undefined,
+      status:
+        input.statuses?.length > 0
+          ? {
+              in: input.statuses,
+            }
+          : undefined,
+    };
+
+    const total = await this.prisma.project.count({ where });
+
+    const items = await this.prisma.project.findMany({
+      select: {
+        ...prismaExclude('Project', [
+          'updatedAt',
+          'metaData',
+          'mobileDashboard',
+          'webDashboard',
+        ]),
+        members: {
+          select: {
+            user: {
+              select: {
+                id: true,
+                avatarImageFileUrl: true,
+                firstName: true,
+                lastName: true,
+              },
+            },
+          },
+          where: {
+            role: 'OWNER',
+          },
+        },
+        _count: {
+          select: {
+            gateways: true,
+          },
+        },
+      },
+      where,
+      orderBy: {
+        [input.sort || 'createdAt']: input.order || 'desc',
+      },
+    });
+
+    return {
+      items,
+      total,
+    };
+  }
+
+  public async adminDeleteProject(id: string) {
+    return this.prisma.project.delete({
+      where: {
+        id,
+      },
+    });
+  }
+
+  public async adminDeleteManyProjects(ids: string[]) {
+    return this.prisma.project.deleteMany({
+      where: {
+        id: {
+          in: ids,
+        },
+      },
+    });
+  }
+
+  public async adminGetProjectById(id: string) {
+    return this.prisma.project.findFirst({
+      where: {
+        id,
+      },
+    });
+  }
+
+  //#endregion
 }
