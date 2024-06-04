@@ -36,7 +36,8 @@ export class DevicesService {
     const result = await this.prisma.device.create({
       data: {
         ...input,
-        dataType: input.dataType || input.type === 'ZIGBEE' ? 'JSON' : 'STRING',
+        dataType:
+          input.dataType || (input.type === 'ZIGBEE' ? 'JSON' : 'STRING'),
         gateway: {
           connect: {
             id: gatewayId,
@@ -154,6 +155,14 @@ export class DevicesService {
                 ...this.projectsService.inWhereFilter(user),
               }
             : { id: projectId },
+        },
+      },
+      include: {
+        gateway: {
+          select: {
+            id: true,
+            name: true,
+          },
         },
       },
     });

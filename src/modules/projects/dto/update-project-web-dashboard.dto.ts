@@ -1,6 +1,11 @@
-import { Allow } from 'class-validator';
+import { Allow, IsOptional } from 'class-validator';
 
-export class UpdateProjectWebDashboardDto {
+export class UpdateProjectDashboardDto {
   @Allow()
-  webDashboard: any;
+  @IsOptional()
+  webDashboard?: any;
+
+  @Allow()
+  @IsOptional()
+  mobileDashboard?: any;
 }

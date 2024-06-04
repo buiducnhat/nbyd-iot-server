@@ -12,6 +12,7 @@ import { PrismaService } from '@src/prisma/prisma.service';
 import { AdminGetListProjectDto } from './dto/admin-get-list-project.dto';
 import { CreateProjectDto } from './dto/create-project.dto';
 import { GetListProjectDto } from './dto/get-list-project.dto';
+import { UpdateProjectDashboardDto } from './dto/update-project-web-dashboard.dto';
 import { UpdateProjectDto } from './dto/update-project.dto';
 
 @Injectable()
@@ -144,13 +145,17 @@ export class ProjectsService {
     });
   }
 
-  async updateWebDashboard(webDashboard: any, id: string, user: User) {
+  async updateDashboard(
+    input: UpdateProjectDashboardDto,
+    id: string,
+    user: User,
+  ) {
     return this.prisma.project.update({
       where: {
         id,
         ...this.editorWhereFilter(user),
       },
-      data: webDashboard,
+      data: input,
     });
   }
 

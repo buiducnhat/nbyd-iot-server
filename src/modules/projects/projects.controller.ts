@@ -35,7 +35,7 @@ import { CreateProjectDto } from './dto/create-project.dto';
 import { GetListDeviceDto } from './dto/get-list-device.dto';
 import { GetListProjectDto } from './dto/get-list-project.dto';
 import { ProjectBasicDto, ProjectDetailDto } from './dto/project.dto';
-import { UpdateProjectWebDashboardDto } from './dto/update-project-web-dashboard.dto';
+import { UpdateProjectDashboardDto } from './dto/update-project-web-dashboard.dto';
 import { UpdateProjectDto } from './dto/update-project.dto';
 import { ProjectsService } from './projects.service';
 
@@ -78,14 +78,14 @@ export class ProjectsController {
     return this.projectsService.update(input, id, user);
   }
 
-  @Patch('/:id/web-dashboard')
+  @Patch('/:id/dashboard')
   @ApiResponse(ProjectBasicDto)
-  async updateWebDashboard(
+  async updateDashboard(
     @Param('id') id: string,
-    @Body() input: UpdateProjectWebDashboardDto,
+    @Body() input: UpdateProjectDashboardDto,
     @CurrentUser() user: User,
   ) {
-    return this.projectsService.updateWebDashboard(input, id, user);
+    return this.projectsService.updateDashboard(input, id, user);
   }
 
   @Delete('/:id')
