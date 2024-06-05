@@ -1,9 +1,12 @@
+# Stage base
 FROM node:lts-alpine as base
+
 RUN npm install --global dotenv-cli
 WORKDIR /app
 COPY package.json yarn.lock ./
 
 
+# Stage builder
 FROM base as builder
 WORKDIR /app
 COPY . .

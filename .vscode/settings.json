@@ -9,5 +9,8 @@
     "NBYD",
     "websockets"
   ],
-  "vsicons.presets.nestjs": true
+  "vsicons.presets.nestjs": true,
+  "yaml.schemas": {
+    "https://json.schemastore.org/github-workflow.json": "file:///Users/buiducnhat/Works/personal/nbyd-iot/nbyd-iot-server/.github/workflows/deploy.yml"
+  }
 }

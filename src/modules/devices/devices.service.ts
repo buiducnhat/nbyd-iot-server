@@ -273,7 +273,7 @@ export class DevicesService {
     const cachedAllValues = await Promise.all(
       cachedKeys.map(async (key) => {
         const cachedValues = await this.redis.get(key);
-        const parsed = parseJson<DeviceValue[]>(cachedValues, []).map((x) => {
+        const parsed = parseJson<DeviceValue[]>(cachedValues, [])?.map((x) => {
           if (typeof x.value !== 'string') {
             x.value = JSON.stringify(x.value);
           }
