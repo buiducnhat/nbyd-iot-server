@@ -10,10 +10,14 @@ import {
   UploadedFile,
   UseInterceptors,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiBearerAuth, ApiBody, ApiConsumes, ApiTags } from '@nestjs/swagger';
 
 import { User } from '@prisma/client';
+
+import { TConfigs } from '@configs/index';
+import { TMqttConfig } from '@configs/mqtt.config';
 
 import { ApiArrayResponse, ApiResponse } from '@shared/response';
 
@@ -35,7 +39,10 @@ import { GatewaysService } from './gateways.service';
 @JwtAuth()
 @UseInterceptors(TransformResponseInterceptor)
 export class GatewaysController {
-  constructor(private readonly gatewayService: GatewaysService) {}
+  constructor(
+    private readonly gatewayService: GatewaysService,
+    private readonly configService: ConfigService<TConfigs>,
+  ) {}
 
   @Post()
   @ApiResponse(GatewayBasicDto)
@@ -74,7 +81,17 @@ export class GatewaysController {
     @Param('projectId') projectId: string,
     @Param('authToken') authToken: string,
   ) {
-    return this.gatewayService.getByAuthToken(authToken, projectId);
+    const gatewayData = await this.gatewayService.getByAuthToken(
+      authToken,
+      projectId,
+    );
+
+    if (!gatewayData) return null;
+
+    return {
+      ...gatewayData,
+      mqtt: this.configService.get<TMqttConfig>('mqtt'),
+    };
   }
 
   @Patch('/:id')
