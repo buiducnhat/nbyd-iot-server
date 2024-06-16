@@ -107,6 +107,8 @@ export class RealtimeComService {
         deviceId: input.deviceId,
         value: input.value,
       });
+
+      return this.devicesService.addValue(input);
     }
   }
 

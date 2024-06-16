@@ -88,10 +88,10 @@ export class GatewaysService {
     return {
       ...gateway,
       devices: devices.map((x) => {
-        const lastValue = deviceValues.get(x.id)?.[0];
+        const lastValueObj = deviceValues.get(x.id)?.[0];
         return {
           ...x,
-          lastValue,
+          lastValue: lastValueObj.value,
         };
       }),
     };
