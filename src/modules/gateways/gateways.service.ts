@@ -91,7 +91,7 @@ export class GatewaysService {
         const lastValueObj = deviceValues.get(x.id)?.[0];
         return {
           ...x,
-          lastValue: lastValueObj.value,
+          lastValue: lastValueObj?.value || x.defaultValue,
         };
       }),
     };
