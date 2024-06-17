@@ -114,6 +114,9 @@ export class GatewaysService {
             }
           : undefined,
       },
+      orderBy: {
+        createdAt: 'desc',
+      },
     });
   }
 

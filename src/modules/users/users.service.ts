@@ -76,6 +76,9 @@ export class UsersService {
           },
         },
       },
+      orderBy: {
+        createdAt: 'desc',
+      },
     });
 
     return new PaginatedData(total, items);

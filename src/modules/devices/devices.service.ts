@@ -143,7 +143,7 @@ export class DevicesService {
     projectId?: string,
     gatewayId?: string,
     user?: User,
-    needValues?: boolean,
+    limitValue?: number,
   ) {
     const devices = await this.prisma.device.findMany({
       where: {
@@ -165,24 +165,34 @@ export class DevicesService {
           },
         },
       },
+      orderBy: {
+        createdAt: 'desc',
+      },
     });
 
-    if (needValues) {
-      const deviceValues = await this.getValues(devices.map((x) => x.id));
+    const deviceValues = await this.getValues(
+      devices.map((x) => x.id),
+      limitValue,
+    );
 
-      return devices.map((x) => {
-        return {
-          ...x,
-          values: deviceValues.get(x.id),
-        };
-      });
-    }
-
-    return devices;
+    return devices.map((x) => {
+      return {
+        ...x,
+        values: deviceValues.get(x.id),
+      };
+    });
   }
 
-  async getValues(deviceIds: string[]): Promise<Map<string, DeviceValue[]>> {
+  async getValues(
+    deviceIds: string[],
+    limitValue = 0,
+  ): Promise<Map<string, DeviceValue[]>> {
     const valuesMap = new Map<string, DeviceValue[]>();
+
+    if (!limitValue) {
+      return valuesMap;
+    }
+
     for (const id of deviceIds) {
       valuesMap.set(id, []);
     }
@@ -205,6 +215,10 @@ export class DevicesService {
           deviceId: {
             in: notCachedIds,
           },
+        },
+        take: limitValue,
+        orderBy: {
+          createdAt: 'desc',
         },
       });
 

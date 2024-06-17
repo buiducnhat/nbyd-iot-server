@@ -89,6 +89,9 @@ export class ProjectsService {
             ]
           : undefined,
       },
+      orderBy: {
+        createdAt: 'desc',
+      },
     });
   }
 

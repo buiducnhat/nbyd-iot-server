@@ -124,7 +124,7 @@ export class ProjectsController {
     @Query() input: GetListDeviceDto,
     @CurrentUser() user: User,
   ) {
-    return this.devicesService.getList(id, undefined, user, input.needValues);
+    return this.devicesService.getList(id, undefined, user, input.limitValue);
   }
 
   @Get('/admin/list')
