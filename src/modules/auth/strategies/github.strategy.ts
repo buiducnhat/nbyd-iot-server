@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 
-import { Profile, Strategy, VerifyCallback } from 'passport-google-oauth20';
+import { Profile, Strategy } from 'passport-github2';
 
 import { TAppConfig } from '@configs/app.config';
 import { TAuthConfig } from '@configs/auth.config';
@@ -11,16 +11,16 @@ import { TConfigs } from '@configs/index';
 import { AuthService } from '../auth.service';
 
 @Injectable()
-export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
+export class GithubStrategy extends PassportStrategy(Strategy, 'github') {
   constructor(
     private readonly configService: ConfigService<TConfigs>,
     private readonly authService: AuthService,
   ) {
     super({
-      clientID: configService.get<TAuthConfig>('auth').googleAppId,
-      clientSecret: configService.get<TAuthConfig>('auth').googleAppSecretKey,
-      callbackURL: `${configService.get<TAppConfig>('app').baseUrl}/${configService.get<TAppConfig>('app').apiPrefix}/auth/google/redirect`,
-      scope: ['email', 'profile'],
+      clientID: configService.get<TAuthConfig>('auth').githubAppId,
+      clientSecret: configService.get<TAuthConfig>('auth').githubAppSecretKey,
+      callbackURL: `${configService.get<TAppConfig>('app').baseUrl}/${configService.get<TAppConfig>('app').apiPrefix}/auth/github/redirect`,
+      scope: ['read:user', 'user:email'],
     });
   }
 
@@ -28,15 +28,15 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
     accessToken: string,
     refreshToken: string,
     profile: Profile,
-    done: VerifyCallback,
+    done: (error: any, user?: any, info?: any) => void,
   ): Promise<any> {
-    let user = await this.authService.findUserByExternal('GOOGLE', profile.id);
+    let user = await this.authService.findUserByExternal('GITHUB', profile.id);
 
     if (!user) {
       user = await this.authService.createUserFromExternal({
-        firstName: profile.name.givenName,
-        lastName: profile.name.familyName,
-        provider: 'GOOGLE',
+        firstName: profile.displayName.split(' ')[0],
+        lastName: profile.displayName.split(' ')?.slice(-1)?.[0],
+        provider: 'GITHUB',
         providerId: profile.id,
         avatarImageFileUrl: profile.photos?.[0].value || undefined,
       });

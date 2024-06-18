@@ -2,7 +2,7 @@ import { HttpStatus, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 
-import { User } from '@prisma/client';
+import { EGender, EUserExternalProvider, User } from '@prisma/client';
 
 import { TAuthConfig } from '@configs/auth.config';
 import { TConfigs } from '@configs/index';
@@ -36,6 +36,62 @@ export class AuthService {
     return this.prisma.user.findUnique({
       where: {
         id: userId,
+      },
+      include: {
+        sessions: true,
+        userLogin: true,
+        externals: true,
+      },
+    });
+  }
+
+  async createUserFromExternal(data: {
+    firstName: string;
+    lastName: string;
+    gender?: EGender;
+    phoneNumber?: string;
+    dateOfBirth?: string;
+    provider: EUserExternalProvider;
+    providerId: string;
+    avatarImageFileUrl?: string;
+  }) {
+    const user = await this.prisma.user.create({
+      data: {
+        firstName: data.firstName,
+        lastName: data.lastName,
+        gender: data.gender,
+        phoneNumber: data.phoneNumber,
+        dateOfBirth: data.dateOfBirth,
+        externals: {
+          create: {
+            provider: data.provider,
+            providerId: data.providerId,
+          },
+        },
+        avatarImageFileUrl: data.avatarImageFileUrl,
+      },
+      include: {
+        sessions: true,
+        userLogin: true,
+        externals: true,
+      },
+    });
+
+    return user;
+  }
+
+  async findUserByExternal(
+    provider: EUserExternalProvider,
+    providerId: string,
+  ) {
+    return this.prisma.user.findFirst({
+      where: {
+        externals: {
+          some: {
+            provider,
+            providerId,
+          },
+        },
       },
       include: {
         sessions: true,

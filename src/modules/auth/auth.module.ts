@@ -10,6 +10,9 @@ import { PrismaModule } from '@src/prisma/prisma.module';
 
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
+import { FacebookStrategy } from './strategies/facebook.strategy';
+import { GithubStrategy } from './strategies/github.strategy';
+import { GoogleStrategy } from './strategies/google.strategy';
 import { JwtStrategy } from './strategies/jwt.strategy';
 
 @Module({
@@ -33,7 +36,13 @@ import { JwtStrategy } from './strategies/jwt.strategy';
     PrismaModule,
   ],
   controllers: [AuthController],
-  providers: [AuthService, JwtStrategy],
+  providers: [
+    AuthService,
+    JwtStrategy,
+    GoogleStrategy,
+    FacebookStrategy,
+    GithubStrategy,
+  ],
   exports: [AuthModule, PassportModule, JwtModule],
 })
 export class AuthModule {}

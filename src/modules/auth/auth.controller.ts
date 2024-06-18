@@ -23,6 +23,7 @@ import { AuthService } from './auth.service';
 import { RegisterInputDto } from './dto/register.dto';
 import { TokenAuthInputDto, TokenAuthResponseDto } from './dto/token-auth.dto';
 import { FacebookAuthGuard } from './guards/facebook-auth.guard';
+import { GithubAuthGuard } from './guards/github-auth.guard';
 import { GoogleAuthGuard } from './guards/google-auth.guard';
 
 @ApiTags('Auth')
@@ -88,6 +89,18 @@ export class AuthController {
   @Get('/google/redirect')
   @UseGuards(GoogleAuthGuard)
   async loginGoogleRedirect(@CurrentUser() user: User): Promise<any> {
+    return user;
+  }
+
+  @Get('/github')
+  @UseGuards(GithubAuthGuard)
+  async loginWithGithub() {
+    return HttpStatus.OK;
+  }
+
+  @Get('/github/redirect')
+  @UseGuards(GithubAuthGuard)
+  async loginGithubRedirect(@CurrentUser() user: User): Promise<any> {
     return user;
   }
 }

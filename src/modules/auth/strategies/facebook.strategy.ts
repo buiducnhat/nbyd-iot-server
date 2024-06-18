@@ -4,20 +4,22 @@ import { PassportStrategy } from '@nestjs/passport';
 
 import { Profile, Strategy } from 'passport-facebook';
 
+import { TAppConfig } from '@configs/app.config';
 import { TAuthConfig } from '@configs/auth.config';
+import { TConfigs } from '@configs/index';
 
 import { AuthService } from '@modules/auth/auth.service';
 
 @Injectable()
 export class FacebookStrategy extends PassportStrategy(Strategy, 'facebook') {
   constructor(
-    private readonly configService: ConfigService<TAuthConfig>,
+    private readonly configService: ConfigService<TConfigs>,
     private readonly authService: AuthService,
   ) {
     super({
-      clientID: configService.get('facebookAppId'),
-      clientSecret: configService.get('facebookAppSecretKey'),
-      callbackURL: 'http://localhost:4000/facebook/redirect',
+      clientID: configService.get<TAuthConfig>('auth').facebookAppId,
+      clientSecret: configService.get<TAuthConfig>('auth').facebookAppSecretKey,
+      callbackURL: `${configService.get<TAppConfig>('app').baseUrl}/${configService.get<TAppConfig>('app').apiPrefix}/auth/facebook/redirect`,
       scope: 'email',
       profileFields: ['emails', 'name'],
     });

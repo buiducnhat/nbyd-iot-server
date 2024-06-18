@@ -14,6 +14,9 @@ export type TAuthConfig = {
 
   googleAppId: string;
   googleAppSecretKey: string;
+
+  githubAppId: string;
+  githubAppSecretKey: string;
 };
 
 class AuthConfigValidator {
@@ -48,6 +51,16 @@ class AuthConfigValidator {
   @IsNotEmpty()
   @IsOptional()
   GOOGLE_APP_SECRET_KEY: string;
+
+  @IsString()
+  @IsNotEmpty()
+  @IsOptional()
+  GITHUB_APP_ID: string;
+
+  @IsString()
+  @IsNotEmpty()
+  @IsOptional()
+  GITHUB_APP_SECRET_KEY: string;
 }
 
 export default registerAs<TAuthConfig>('auth', () => {
@@ -64,5 +77,8 @@ export default registerAs<TAuthConfig>('auth', () => {
 
     googleAppId: process.env.GOOGLE_APP_ID,
     googleAppSecretKey: process.env.GOOGLE_APP_SECRET_KEY,
+
+    githubAppId: process.env.GITHUB_APP_ID,
+    githubAppSecretKey: process.env.GITHUB_APP_SECRET_KEY,
   };
 });

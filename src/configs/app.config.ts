@@ -17,6 +17,7 @@ export type TAppConfig = {
   sslCertPath: string;
   sslKeyPath: string;
   apiPrefix: string;
+  baseUrl: string;
 };
 
 class AppConfigValidator {
@@ -50,11 +51,12 @@ export default registerAs<TAppConfig>('app', () => {
 
   return {
     nodeEnv: (process.env.NODE_ENV as ENodeEnv) || ENodeEnv.DEVELOPMENT,
-    host: process.env.HOST || 'localhost',
+    host: process.env.HOST || 'http://localhost',
     port: parseInt(process.env.PORT) || 4000,
     enableTLS: process.env.ENABLE_TLS === 'true',
     sslCertPath: process.env.SSL_CERT_PATH,
     sslKeyPath: process.env.SSL_KEY_PATH,
     apiPrefix: process.env.API_PREFIX || 'api',
+    baseUrl: process.env.BASE_URL || 'http://localhost:4000',
   };
 });

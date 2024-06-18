@@ -76,6 +76,7 @@ model UserSession {
 enum EUserExternalProvider {
   GOOGLE
   FACEBOOK
+  GITHUB
 }
 
 model UserExternal {
@@ -88,6 +89,8 @@ model UserExternal {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@unique([provider, providerId])
 }
 
 enum EProjectStatus {
