@@ -30,17 +30,13 @@ export class GithubStrategy extends PassportStrategy(Strategy, 'github') {
     profile: Profile,
     done: (error: any, user?: any, info?: any) => void,
   ): Promise<any> {
-    let user = await this.authService.findUserByExternal('GITHUB', profile.id);
-
-    if (!user) {
-      user = await this.authService.createUserFromExternal({
-        firstName: profile.displayName.split(' ')[0],
-        lastName: profile.displayName.split(' ')?.slice(-1)?.[0],
-        provider: 'GITHUB',
-        providerId: profile.id,
-        avatarImageFileUrl: profile.photos?.[0].value || undefined,
-      });
-    }
+    const user = await this.authService.loginWithExternal({
+      firstName: profile.displayName.split(' ')[0],
+      lastName: profile.displayName.split(' ')?.slice(-1)?.[0],
+      provider: 'GITHUB',
+      providerId: profile.id,
+      avatarImageFileUrl: profile.photos?.[0].value || undefined,
+    });
 
     return done(null, user);
   }

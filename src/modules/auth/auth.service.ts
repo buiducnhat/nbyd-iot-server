@@ -45,7 +45,7 @@ export class AuthService {
     });
   }
 
-  async createUserFromExternal(data: {
+  private async createUserFromExternal(data: {
     firstName: string;
     lastName: string;
     gender?: EGender;
@@ -80,7 +80,7 @@ export class AuthService {
     return user;
   }
 
-  async findUserByExternal(
+  private async findUserByExternal(
     provider: EUserExternalProvider,
     providerId: string,
   ) {
@@ -99,6 +99,37 @@ export class AuthService {
         externals: true,
       },
     });
+  }
+
+  async loginWithExternal(data: {
+    firstName: string;
+    lastName: string;
+    gender?: EGender;
+    phoneNumber?: string;
+    dateOfBirth?: string;
+    provider: EUserExternalProvider;
+    providerId: string;
+    avatarImageFileUrl?: string;
+  }) {
+    let user = await this.findUserByExternal(data.provider, data.providerId);
+
+    if (!user) {
+      user = await this.createUserFromExternal(data);
+    }
+
+    return this.getJwtTokenUsingUser(user);
+  }
+
+  async getJwtTokenUsingUser(user: User) {
+    const accessToken = this.generateJwtToken(user);
+    const refreshToken = this.generateRefreshToken(user.id);
+
+    return {
+      accessToken,
+      refreshToken,
+      accessTokenExpiresIn: this.accessTokenExpireIn,
+      refreshTokenExpiresIn: this.refreshTokenExpireIn,
+    };
   }
 
   async register(registerDto: RegisterInputDto): Promise<boolean> {
@@ -188,15 +219,7 @@ export class AuthService {
       },
     });
 
-    const accessToken = this.generateJwtToken(user);
-    const refreshToken = this.generateRefreshToken(user.id);
-
-    return {
-      accessToken,
-      refreshToken,
-      accessTokenExpiresIn: this.accessTokenExpireIn,
-      refreshTokenExpiresIn: this.refreshTokenExpireIn,
-    };
+    return this.getJwtTokenUsingUser(user);
   }
 
   private generateJwtToken(user: User) {

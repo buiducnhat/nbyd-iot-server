@@ -30,17 +30,13 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
     profile: Profile,
     done: VerifyCallback,
   ): Promise<any> {
-    let user = await this.authService.findUserByExternal('GOOGLE', profile.id);
-
-    if (!user) {
-      user = await this.authService.createUserFromExternal({
-        firstName: profile.name.givenName,
-        lastName: profile.name.familyName,
-        provider: 'GOOGLE',
-        providerId: profile.id,
-        avatarImageFileUrl: profile.photos?.[0].value || undefined,
-      });
-    }
+    const user = await this.authService.loginWithExternal({
+      firstName: profile.name.givenName,
+      lastName: profile.name.familyName,
+      provider: 'GOOGLE',
+      providerId: profile.id,
+      avatarImageFileUrl: profile.photos?.[0].value || undefined,
+    });
 
     return done(null, user);
   }

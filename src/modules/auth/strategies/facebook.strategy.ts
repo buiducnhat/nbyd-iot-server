@@ -31,8 +31,14 @@ export class FacebookStrategy extends PassportStrategy(Strategy, 'facebook') {
     profile: Profile,
     done: (err: any, result: any, info?: any) => void,
   ): Promise<any> {
-    const result = profile;
+    const user = await this.authService.loginWithExternal({
+      firstName: profile.name.givenName,
+      lastName: profile.name.familyName,
+      provider: 'FACEBOOK',
+      providerId: profile.id,
+      avatarImageFileUrl: profile.photos?.[0].value || undefined,
+    });
 
-    done(null, result);
+    return done(null, user);
   }
 }
