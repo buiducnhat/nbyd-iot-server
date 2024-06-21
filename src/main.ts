@@ -57,13 +57,17 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(
     app,
     new DocumentBuilder()
-      .setTitle('NBYD IoT Platform Backend')
-      .setDescription('Api documents for NBYD IoT Platform')
+      .setTitle('Nbyd IoT Platform Backend')
+      .setDescription('Api documents for Nbyd IoT Platform')
       .setVersion('1.0')
       .addBearerAuth()
       .build(),
   );
-  SwaggerModule.setup(apiPrefix, app, document);
+  SwaggerModule.setup(apiPrefix, app, document, {
+    swaggerOptions: {
+      persistAuthorization: true,
+    },
+  });
   // End Swagger setup
 
   // MQTT setup
