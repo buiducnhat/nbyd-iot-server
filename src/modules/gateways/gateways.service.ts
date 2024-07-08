@@ -92,7 +92,7 @@ export class GatewaysService {
         return {
           ...x,
           lastValue:
-            lastValueObj?.value !== null || lastValueObj?.value !== undefined
+            lastValueObj?.value !== null && lastValueObj?.value !== undefined
               ? lastValueObj?.value
               : x.defaultValue,
         };
