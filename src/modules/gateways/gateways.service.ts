@@ -83,6 +83,7 @@ export class GatewaysService {
     const devices = await this.devicesService.getList(projectId, gateway.id);
     const deviceValues = await this.devicesService.getValues(
       gateway.devices.map((x) => x.id),
+      1,
     );
 
     return {
