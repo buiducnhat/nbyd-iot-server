@@ -207,7 +207,9 @@ export class DevicesService {
     }
 
     const notCachedIds = deviceIds.filter(
-      (id) => !cachedKeys.includes(`/devices/${id}/values`),
+      (id) =>
+        !cachedKeys.includes(`/devices/${id}/values`) ||
+        !valuesMap.get(id).length,
     );
     if (notCachedIds.length) {
       const values = await this.prisma.deviceValue.findMany({
